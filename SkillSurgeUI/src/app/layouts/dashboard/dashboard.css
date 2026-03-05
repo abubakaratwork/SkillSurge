@@ -1,0 +1,22 @@
+/* Root page layout */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* full viewport height */
+}
+
+/* Header and footer: natural height, stick */
+app-header,
+app-footer {
+  flex: 0 0 auto;
+}
+
+/* Main content grows to fill remaining space */
+main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-gradient);
+  padding: 2rem;
+  overflow: auto; /* allow scrolling if content is too tall */
+}

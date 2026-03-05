@@ -1,0 +1,65 @@
+<div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+
+  <div class="flex justify-between items-start mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">
+        {{ product.name || 'Product Name' }}
+      </h1>
+    </div>
+
+    <span
+      class="px-3 py-1 text-xs font-semibold rounded-full"
+      [ngClass]="product.isActive 
+        ? 'bg-green-100 text-green-700' 
+        : 'bg-red-100 text-red-700'">
+      {{ product.isActive ? 'Active' : 'Inactive' }}
+    </span>
+  </div>
+
+  <div class="border-t border-gray-100 mb-6"></div>
+
+  <div class="mb-6">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      Description
+    </h2>
+    <p class="text-gray-700 leading-relaxed">
+      {{ product.description || 'No description provided.' }}
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase mb-1">Price</p>
+      <p class="text-xl font-semibold text-indigo-600">
+        PKR {{ product.price | number:'1.2-2' }}
+      </p>
+    </div>
+
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase mb-1">Stock Quantity</p>
+      <p class="text-xl font-semibold"
+         [ngClass]="product.stockQuantity > 0 
+           ? 'text-green-600' 
+           : 'text-red-600'">
+        {{ product.stockQuantity }}
+      </p>
+    </div>
+
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase mb-1">Created At</p>
+      <p class="text-gray-800">
+        {{ product.createdAt | date:'dd-MMM-yyyy hh:mm a' | uppercase}}
+      </p>
+    </div>
+
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase mb-1">Last Updated</p>
+      <p class="text-gray-800">
+        {{ product.updatedAt | date:'dd-MMM-yyyy hh:mm a' | uppercase }}
+      </p>
+    </div>
+
+  </div>
+
+</div>

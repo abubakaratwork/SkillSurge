@@ -1,0 +1,23 @@
+::ng-deep .custom-ng-select .ng-select-container {
+  width: 100%;
+  padding: 0.5rem 0.75rem; /* py-2 px-3 */
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.5rem; /* rounded-lg */
+  min-height: 42px;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+::ng-deep .custom-ng-select.ng-select-focused .ng-select-container {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+::ng-deep .custom-ng-select.ng-invalid.ng-touched .ng-select-container {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+
+::ng-deep .custom-ng-select .ng-placeholder {
+  color: #9ca3af; /* gray-400 */
+}

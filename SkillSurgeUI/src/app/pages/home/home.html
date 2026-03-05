@@ -1,0 +1,75 @@
+<section class="mt-12 px-6">
+
+  <!-- Button to open modal -->
+  <div class="flex justify-end mb-4">
+    <button 
+      (click)="openModal()"
+      class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
+    >
+      Add Product
+    </button>
+  </div>
+
+  <!-- Products table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+      <thead class="bg-gray-50">
+        <tr class="text-left text-gray-700">
+          <th class="px-4 py-2 font-semibold">Name</th>
+          <th class="px-4 py-2 font-semibold">Description</th>
+          <th class="px-4 py-2 font-semibold">Price (PKR)</th>
+          <th class="px-4 py-2 font-semibold">Stock Quantity</th>
+          <th class="px-4 py-2 font-semibold">Active</th>
+          <th class="px-4 py-2 font-semibold">Created At</th>
+          <th class="px-4 py-2 font-semibold">Updated At</th>
+          <th class="px-4 py-2 font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        @for(product of products; track products){
+        <tr>
+          <td class="px-4 py-2">{{ product.name }}</td>
+          <td class="px-4 py-2">{{ product.description }}</td>
+          <td class="px-4 py-2">{{ product.price }}</td>
+          <td class="px-4 py-2">{{ product.stockQuantity }}</td>
+          <td class="px-4 py-2 text-green-500" [class]="product.isActive ? 'text-green-500' : 'text-red-500'">
+            <mat-icon>
+              {{ product.isActive ? 'check' : 'close' }}
+            </mat-icon>
+          </td>
+          <td class="px-4 py-2">{{ product.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+          <td class="px-4 py-2">{{ product.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+          <td class="px-4 py-2 flex gap-2">
+            <button 
+              (click)="edit(product.id)" 
+              class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg transition-colors"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button 
+              (click)="deleteProductById(product.id)"
+              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button 
+              (click)="viewProduct(product.id)"
+              class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded-lg transition-colors"
+            >
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </td>
+        </tr>
+        }
+        @empty {
+        <tr>
+          <td colspan="8" class="text-center py-6 text-gray-500">
+            No Product Found
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</section>
