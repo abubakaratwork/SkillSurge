@@ -1,53 +1,22 @@
 <header class="bg-white shadow-md sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+  <div class=" mx-auto px-6 py-4 flex items-center justify-between">
 
-    <div class="text-3xl font-extrabold text-primary tracking-wide cursor-pointer" routerLink="/">
-      MyApp
+    <div class="flex gap-10">
+      <div class="text-3xl font-extrabold text-primary tracking-wide cursor-pointer" routerLink="/">
+        SkillSurge
+      </div>
+      <button class="p-2 rounded-md hover:bg-gray-100 transition cursor-pointer" (click)="toggleSidebar.emit()">
+        <mat-icon>menu</mat-icon>
+      </button>
     </div>
 
     <nav class="flex items-center space-x-6 text-gray-700 font-medium">
-      
-      <a 
-        routerLink="/" 
-        routerLinkActive="text-primary font-semibold border-b-2 border-primary" 
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="hover:text-primary transition-colors relative pb-1"
-      >
-        Home
-      </a>
 
-      @if(!isAuthenticated){
-        <a 
-          routerLink="/login" 
-          routerLinkActive="text-primary font-semibold border-b-2 border-primary"
-          class="hover:text-primary transition-colors relative pb-1"
-        >
-          Login
-        </a>
-        <a 
-          routerLink="/signup" 
-          routerLinkActive="text-primary font-semibold border-b-2 border-primary"
-          class="hover:text-primary transition-colors relative pb-1"
-        >
-          Signup
-        </a>
-      }
-
-      @if(isAuthenticated){
-        <a 
-          routerLink="/dashboard" 
-          routerLinkActive="text-primary font-semibold border-b-2 border-primary"
-          class="hover:text-primary transition-colors relative pb-1"
-        >
-          Dashboard
-        </a>
-        <button 
-          class="bg-primary text-white px-3 py-2 rounded-xl font-semibold hover:bg-primary-hover transition-all shadow-md hover:shadow-lg flex items-center justify-center cursor-pointer"
-          (click)="logout()"
-        >
-          <mat-icon>exit_to_app</mat-icon>
-        </button>
-      }
+      <button
+        class="bg-primary text-white px-3 py-2 rounded-xl font-semibold hover:bg-primary-hover transition-all shadow-md hover:shadow-lg flex items-center justify-center cursor-pointer"
+        (click)="logout()">
+        <mat-icon>exit_to_app</mat-icon>
+      </button>
 
     </nav>
 

@@ -1,8 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { Product } from '../../core/services/localproduct.service';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NgLabelTemplateDirective, NgOptionTemplateDirective, NgSelectComponent, NgSelectModule } from '@ng-select/ng-select';
-import { MAT_DIALOG_DATA, MatDialogClose, MatDialogRef } from "@angular/material/dialog";
+import { NgSelectComponent } from '@ng-select/ng-select';
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { Product } from '../../core/models/interfaces/Product';
+import { UtilityService } from '../../core/services/utility.service';
+import { LocalAuthService } from '../../core/services/localauth.service';
+import { Category } from '../../core/models/interfaces/Category';
+import { LocalCategoryService } from '../../core/services/localcategory.service';
 
 @Component({
   selector: 'app-product-dialog',
@@ -19,15 +23,15 @@ export class ProductDialog {
     validationErrorText: 'text-red-500 text-sm mt-1'
   }
 
-  constructor(private dialogRef: MatDialogRef<ProductDialog>, @Inject(MAT_DIALOG_DATA) private dialogData: any) { }
+  userId: string = '';
 
-  categories = [
-    { id: 1, name: 'Mobile' },
-    { id: 2, name: 'Laptop' },
-    { id: 3, name: 'Desktop' }
-  ];
+  constructor(private dialogRef: MatDialogRef<ProductDialog>, @Inject(MAT_DIALOG_DATA) private dialogData: any, private utility: UtilityService, private authService: LocalAuthService, private categoryService: LocalCategoryService) {
+    this.userId = this.authService.user()?.id!;
+  }
 
-  selectedCategory: number | null = null;
+  categories: Category[] = [];
+
+  selectedCategory: string | null = null;
 
   products: Product[] = [];
 
@@ -39,7 +43,9 @@ export class ProductDialog {
     stockQuantity: 0,
     isActive: true,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    categoryId: '',
+    userId: ''
   };
 
   dialogAction: string = '';
@@ -47,6 +53,9 @@ export class ProductDialog {
   ngOnInit() {
     if (this.dialogData) {
       this.product = this.dialogData?.formData ?? this.product;
+      if (this.product.categoryId != null && this.product.categoryId != '') 
+        this.selectedCategory = this.product.categoryId;
+      this.categories = this.categoryService.getAll();
       this.dialogAction = this.dialogData?.action;
     }
   }
@@ -57,9 +66,13 @@ export class ProductDialog {
       return;
     }
 
-    this.product.id = this.dialogAction == 'create' ? this.generateId() : this.product.id;
-    this.product.createdAt = this.dialogAction == 'create' ? new Date() : this.product.createdAt;
-    this.product.updatedAt = new Date();
+    let product = this.product!;
+
+    product.id = this.dialogAction == 'create' ? this.utility.generateId() : product.id;
+    product.createdAt = this.dialogAction == 'create' ? new Date() : product.createdAt;
+    product.categoryId = this.selectedCategory!;
+    product.updatedAt = new Date();
+    if (this.dialogAction == 'create') product.userId = this.userId;
     this.dialogRef.close(this.product)
     this.setFormDefault()
   }
@@ -70,7 +83,7 @@ export class ProductDialog {
   }
 
   setFormDefault() {
-    this.product = {
+    let product: Product = {
       id: '0000000-0000-0000-0000-0000000000000',
       name: '',
       description: '',
@@ -78,15 +91,11 @@ export class ProductDialog {
       stockQuantity: 0,
       isActive: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      categoryId: '',
+      userId: ''
     };
-  }
 
-  generateId(): string {
-    return 'xxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
+    return product;
   }
 }

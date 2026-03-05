@@ -1,15 +1,16 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { BaseApiService } from "./base-api.service";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class ProductService {
-
-  private baseUrl = "https://localhost:7121/api/product";
-
-  constructor(private client: HttpClient) {}
+  baseUrl: string = '';
+  constructor(private client: HttpClient, private config: BaseApiService) {
+    this.baseUrl = `${this.config.baseApiUrl}/api/product`;
+  }
 
   createProduct(data: any): Observable<any> {
     return this.client.post(`${this.baseUrl}/create`, data, {

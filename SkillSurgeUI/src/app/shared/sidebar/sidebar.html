@@ -1,0 +1,25 @@
+<aside class="bg-white border-r border-gray-200 h-full flex flex-col transition-all duration-300"
+       [ngClass]="isCollapsed ? 'w-16' : 'w-64'">
+
+  <nav class="flex-1 flex flex-col mt-4">
+    @for(item of navItems; track item){
+      <a [routerLink]="item.link" routerLinkActive="bg-gray-100 text-primary"
+         class="flex items-center gap-3 pl-4 pr-2 py-3 hover:bg-gray-100 transition-colors text-gray-700 font-medium">
+
+        <mat-icon>{{ item.icon }}</mat-icon>
+
+        <span class="overflow-hidden whitespace-nowrap transition-all duration-300"
+              [style.maxWidth]="!isCollapsed ? '200px' : '0px'"
+              [style.opacity]="!isCollapsed ? '1' : '0'"
+              [style.transitionDelay]="!isCollapsed ? (50 * navItems.indexOf(item)) + 'ms' : '0ms'"
+              [ngClass]="{'pointer-events-none': isCollapsed}">
+          @if(!isCollapsed){
+            {{ item.label }}
+          }
+        </span>
+
+      </a>
+    }
+  </nav>
+
+</aside>

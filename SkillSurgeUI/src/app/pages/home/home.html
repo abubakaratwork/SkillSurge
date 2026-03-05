@@ -2,10 +2,8 @@
 
   <!-- Button to open modal -->
   <div class="flex justify-end mb-4">
-    <button 
-      (click)="openModal()"
-      class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
-    >
+    <button (click)="openModal()"
+      class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg">
       Add Product
     </button>
   </div>
@@ -15,55 +13,58 @@
     <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
       <thead class="bg-gray-50">
         <tr class="text-left text-gray-700">
-          <th class="px-4 py-2 font-semibold">Name</th>
-          <th class="px-4 py-2 font-semibold">Description</th>
-          <th class="px-4 py-2 font-semibold">Price (PKR)</th>
-          <th class="px-4 py-2 font-semibold">Stock Quantity</th>
-          <th class="px-4 py-2 font-semibold">Active</th>
-          <th class="px-4 py-2 font-semibold">Created At</th>
-          <th class="px-4 py-2 font-semibold">Updated At</th>
-          <th class="px-4 py-2 font-semibold">Actions</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Name</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Description</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Category</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Price (PKR)</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Stock Quantity</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Active</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Created At</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Updated At</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Actions</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         @for(product of products; track products){
         <tr>
-          <td class="px-4 py-2">{{ product.name }}</td>
-          <td class="px-4 py-2">{{ product.description }}</td>
-          <td class="px-4 py-2">{{ product.price }}</td>
-          <td class="px-4 py-2">{{ product.stockQuantity }}</td>
-          <td class="px-4 py-2 text-green-500" [class]="product.isActive ? 'text-green-500' : 'text-red-500'">
+          <td class="px-4 py-2 text-nowrap">{{ product.name }}</td>
+          <td class="px-4 py-2 text-nowrap">{{ product.description }}</td>
+          <td class="px-4 py-2 text-nowrap">{{ product.category?.name || 'Not selected' }}</td>
+          <td class="px-4 py-2 text-nowrap">{{ product.price }}</td>
+          <td class="px-4 py-2 text-nowrap">{{ product.stockQuantity }}</td>
+          <td class="px-4 py-2 text-nowrap text-green-500"
+            [class]="product.isActive ? 'text-green-500' : 'text-red-500'">
             <mat-icon>
               {{ product.isActive ? 'check' : 'close' }}
             </mat-icon>
           </td>
-          <td class="px-4 py-2">{{ product.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
-          <td class="px-4 py-2">{{ product.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+          <td class="px-4 py-2 text-nowrap">{{ product.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+          <td class="px-4 py-2 text-nowrap">{{ product.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
           <td class="px-4 py-2 flex gap-2">
-            <button 
-              (click)="edit(product.id)" 
-              class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg transition-colors"
-            >
+            <button (click)="edit(product.id)"
+              class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg transition-colors flex items-center justify-center">
               <mat-icon>edit</mat-icon>
             </button>
-            <button 
-              (click)="deleteProductById(product.id)"
-              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors"
-            >
+            <button (click)="deleteProductById(product.id)"
+              class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg transition-colors flex items-center justify-center">
               <mat-icon>delete</mat-icon>
             </button>
-            <button 
-              (click)="viewProduct(product.id)"
-              class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded-lg transition-colors"
-            >
-              <mat-icon>arrow_forward</mat-icon>
+            <button (click)="viewProduct(product.id)"
+              class="bg-primary hover:bg-primary-hover text-white px-1.5 py-1 rounded-lg transition-colors flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-eye">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+              </svg>
             </button>
           </td>
         </tr>
         }
         @empty {
         <tr>
-          <td colspan="8" class="text-center py-6 text-gray-500">
+          <td colspan="9" class="text-center py-6 text-gray-500">
             No Product Found
           </td>
         </tr>

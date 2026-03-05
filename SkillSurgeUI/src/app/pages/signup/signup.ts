@@ -4,6 +4,8 @@ import { RouterLink } from "@angular/router";
 import { AuthService } from '../../core/services/auth.service';
 import { LocalAuthService } from '../../core/services/localauth.service';
 import { Button } from '../../shared/button/button';
+import { UtilityService } from '../../core/services/utility.service';
+import { RoleTypes, User } from '../../core/models/interfaces/User';
 
 @Component({
   selector: 'app-signup',
@@ -16,6 +18,8 @@ export class Signup {
   authService = inject(AuthService);
   localAuth = inject(LocalAuthService);
 
+  constructor(private utility: UtilityService) { }
+
   signupData = new FormGroup({
     firstName: new FormControl('', [Validators.required]),
     lastName: new FormControl('', [Validators.required]),
@@ -26,20 +30,18 @@ export class Signup {
 
   handleSignup() {
     if (this.signupData.valid) {
-      console.log('Account Created:', this.signupData.value);
-      this.localAuth.signup(this.signupData.value);
-      // this.authService.login(this.signupData.value).subscribe({
-      //   next: (response) => {
-      //     if (response.isSuccess){
-      //       console.log('Success!', response.message);
-      //     } else {
-      //       console.error('Logic Error:', response.message);
-      //     }
-      //   },
-      //   error: (err) => {
-      //     console.error('HTTP Error (e.g. 404 or 500):', err);
-      //   }
-      // })
+      const value = this.signupData.value;
+      let user: User = {
+        id: this.utility.generateId(),
+        email: value.email!,
+        firstName: value.firstName!,
+        lastName: value.lastName!,
+        password: value.password!,
+        agreeTerms: value.agreeTerms!,
+        role: RoleTypes.user
+      };
+      this.localAuth.signup(user);
+      console.log('Account Created:', user);
     }
   }
 }

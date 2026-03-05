@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from "@angular/material/icon";
+import { LocalAuthService } from '../../core/services/localauth.service';
 
 @Component({
   selector: 'app-header',
@@ -9,13 +10,17 @@ import { MatIcon } from "@angular/material/icon";
   styleUrl: './header.css',
 })
 export class Header {
+  @Output() toggleSidebar = new EventEmitter<void>();
 
-  isAuthenticated = true;
+  isAuthenticated:boolean = false;
+  constructor(private router: Router, private authService: LocalAuthService) {}
 
-  constructor(private router: Router) {}
-
- logout() {
-    this.isAuthenticated = false;
+  logout() {
+    this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  ngOnInit(){
+    this.isAuthenticated = this.authService.isLoggedIn();
   }
 }
