@@ -22,7 +22,7 @@ export class ToastService {
         this.snackBar.open(`${icons[type]}  ${message}`, '✖', {
             duration,
             horizontalPosition: 'center',
-            verticalPosition: 'top',
+            verticalPosition: 'bottom',
             panelClass: ['toast', `toast-${type}`],
         });
     }
