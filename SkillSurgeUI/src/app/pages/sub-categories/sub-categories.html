@@ -1,0 +1,68 @@
+<section class="mt-12 px-6">
+
+    <!-- Button to open SubCategory modal -->
+    <div class="flex justify-end mb-4">
+        <button (click)="openSubCategoryModal()"
+            class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg">
+            Add SubCategory
+        </button>
+    </div>
+
+    <!-- SubCategories table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+            <thead class="bg-gray-50">
+                <tr class="text-left text-gray-700">
+                    <th class="px-4 py-2 font-semibold text-nowrap">Name</th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Parent Category</th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Description</th>
+                    <!-- <th class="px-4 py-2 font-semibold text-nowrap">Active</th> -->
+                    <th class="px-4 py-2 font-semibold text-nowrap">Created At</th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Updated At</th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody class="bg-white divide-y divide-gray-200">
+
+                @for(subCategory of subCategories; track subCategories){
+
+                <tr>
+                    <td class="px-4 py-2 text-nowrap">{{ subCategory.name }}</td>
+                    <td class="px-4 py-2 text-nowrap">{{ subCategory.category?.name || 'Not assigned' }}</td>
+                    <td class="px-4 py-2 text-nowrap">{{ subCategory.description || '-' }}</td>
+                    <!-- <td class="px-4 py-2 text-nowrap"
+                        [class]="subCategory.isActive ? 'text-green-500' : 'text-red-500'">
+                        <mat-icon>{{ subCategory.isActive ? 'check' : 'close' }}</mat-icon>
+                    </td> -->
+                    <td class="px-4 py-2 text-nowrap">{{ subCategory.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+                    <td class="px-4 py-2 text-nowrap">{{ subCategory.udpatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+                    <td class="px-4 py-2 flex gap-2">
+                        <!-- Edit -->
+                        <button (click)="editSubCategory(subCategory.id)"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg transition-colors flex items-center justify-center">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+
+                        <!-- Delete -->
+                        <button (click)="deleteSubCategoryById(subCategory.id)"
+                            class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg transition-colors flex items-center justify-center">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </tr>
+
+                }
+                @empty {
+                <tr>
+                    <td colspan="7" class="text-center py-6 text-gray-500">
+                        No SubCategory Found
+                    </td>
+                </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+</section>

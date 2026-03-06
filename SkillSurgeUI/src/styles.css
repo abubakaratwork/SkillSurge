@@ -17,8 +17,38 @@
   --font-inter: Roboto, "Helvetica Neue", sans-serif;
 }
 
-html, body { height: 100%; }
+html,
+body {
+  height: 100%;
+}
 
 /* input::placeholder{
     color: gray;
 } */
+.toast-success .mdc-snackbar__surface {
+  background-color: #6366f1 !important;
+  color: white !important;
+}
+
+.toast-error .mdc-snackbar__surface {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.toast-info .mdc-snackbar__surface {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.toast-warning .mdc-snackbar__surface {
+  background-color: #f59e0b !important;
+  color: black !important;
+}
+
+.toast-success .mat-mdc-snack-bar-action {
+  color: white !important;
+}
+
+.toast-error .mat-mdc-snack-bar-action {
+  color: white !important;
+}

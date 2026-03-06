@@ -1,86 +1,156 @@
-  <div class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-lg relative shadow-lg">
-      <span 
-        class="absolute top-4 right-4 text-gray-500 text-2xl cursor-pointer hover:text-gray-700 transition-colors" (click)="close()">&times;</span>
+<div class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-lg relative shadow-lg">
+    <span class="absolute top-4 right-4 text-gray-500 text-2xl cursor-pointer hover:text-gray-700 transition-colors"
+      (click)="close()">&times;</span>
 
-      <h2 class="text-2xl font-semibold mb-4 text-gray-800">Add Product</h2>
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Add Product</h2>
 
-      <form #productForm="ngForm" (ngSubmit)="submitForm(productForm)" class="space-y-4">
+    <form #productForm="ngForm" (ngSubmit)="submitForm(productForm)" class="space-y-4">
 
-        <div class="text-left">
-          <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-          <input id="name" type="text" name="name" [(ngModel)]="product.name" required minlength="2" #name="ngModel" placeholder="Enter product name"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition placeholder-gray-400"
-          >
-          @if(name.hasError('required') && name.invalid && (name.touched || name.dirty)){
-            <div [class]="repetitiveStyles.validationErrorText">Name is required.</div>
+      <div class="text-left">
+        <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Name <span
+            class="text-red-500">*</span></label>
+        <input id="name" type="text" name="name" [(ngModel)]="product.name" required minlength="2" #name="ngModel"
+          placeholder="Enter product name"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition placeholder-gray-400">
+        @if(name.hasError('required') && name.invalid && (name.touched || name.dirty)){
+        <div [class]="repetitiveStyles.validationErrorText">Name is required.</div>
+        }
+        @else if(name.hasError('minlength') && name.invalid && (name.touched || name.dirty)){
+        <div [class]="repetitiveStyles.validationErrorText">Minimum length should be 2 characters.</div>
+        }
+      </div>
+
+      <div class="text-left">
+        <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+        <input id="description" type="text" name="description" [(ngModel)]="product.description"
+          placeholder="Enter product description"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition placeholder-gray-400">
+      </div>
+
+      <div class="flex items-start justify-between gap-4">
+
+        <!-- Category -->
+        <div class="text-left w-[48%]">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            Category <span class="text-red-500">*</span>
+          </label>
+
+          <ng-select [items]="categories" bindLabel="name" bindValue="id" [(ngModel)]="selectedCategory" name="category"
+            #category="ngModel" required placeholder="Select category" class="h-10 w-full text-sm"
+            (ngModelChange)="onCategoryChange($event)">
+
+          </ng-select>
+
+          @if(category.invalid && (category.touched || category.dirty)){
+          <div [class]="repetitiveStyles.validationErrorText">
+            Category is required.
+          </div>
           }
-          @else if(name.hasError('minlength') && name.invalid && (name.touched || name.dirty)){
-            <div [class]="repetitiveStyles.validationErrorText">Minimum length should be 2 characters.</div>
-          }
+
         </div>
 
-        <div class="text-left">
-          <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-          <input id="description" type="text" name="description" [(ngModel)]="product.description" placeholder="Enter product description"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition placeholder-gray-400"
-          >
-        </div>
 
-         <div class="text-left w-full max-w-md">
-            <label for="category" class="block text-sm font-semibold text-gray-700 mb-1">Category <span class="text-red-500">*</span></label>
-            <ng-select
-                [items]="categories"
-                bindLabel="name"
-                bindValue="id"
-                [(ngModel)]="selectedCategory"
-                name="category"
-                #category="ngModel"
-                required
-                placeholder="Select a category" 
-                class="w-full h-10 text-sm border-2 border-none rounded-full"
-                [ngClass]="{'bg-gray-50': !selectedCategory}">
-            </ng-select>
+        <!-- Sub Category -->
+        <div class="text-left w-[48%]">
 
-            @if(category.invalid && (category.touched || category.dirty)){
-                <div [class]="repetitiveStyles.validationErrorText">
-                    Category is required.
-                </div>
+          <div class="flex items-start justify-between">
+            <label class="text-sm font-semibold text-gray-700 mb-1">
+              Sub Category <span class="text-red-500">*</span>
+            </label>
+
+            @if(!selectedCategory){
+            <span class="relative text-gray-400 cursor-pointer group">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z" />
+              </svg>
+              <span
+                class="absolute right-0 bottom-full mb-1 hidden group-hover:block text-xs bg-gray-600 text-white px-2 py-1 rounded whitespace-nowrap">
+                Select a category first
+              </span>
+            </span>
             }
+          </div>
+
+          <ng-select [items]="subCategories" bindLabel="name" bindValue="id" [(ngModel)]="selectedSubCategory"
+            name="subCategory" #subCategory="ngModel" [disabled]="!selectedCategory || subCategories.length === 0"
+            [required]="subCategoryRequired" placeholder="Select sub category" class="h-10 w-full text-sm">
+
+          </ng-select>
+
+          @if(subCategory.invalid && (subCategory.touched || subCategory.dirty)){
+          <div [class]="repetitiveStyles.validationErrorText">
+            Sub category is required.
+          </div>
+          }
+
         </div>
 
-        <div class="flex items-start justify-between gap-4">
-            <div class="text-left w-[48%]">
-              <label for="price" class="block text-sm font-semibold text-gray-700 mb-1">Price <span class="text-red-500">*</span></label>
-              <input id="price" type="number" min="1" max="100000" name="price" [(ngModel)]="product.price" required #price="ngModel"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition no-spinner"
-              >
-              @if(price.invalid && (price.touched || price.dirty)){
-                <div [class]="repetitiveStyles.validationErrorText">Price is required.</div>
-              }
-            </div>
-             
-            <div class="text-left w-[48%]">
-              <label for="stockQuantity" class="block text-sm font-semibold text-gray-700 mb-1">Stock Quantity <span class="text-red-500">*</span></label>
-              <input id="stockQuantity" type="number" min="1" max="1000" required name="stockQuantity" [(ngModel)]="product.stockQuantity" #stockQuantity="ngModel"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition no-spinner"
-              >
-              @if(stockQuantity.invalid && (stockQuantity.touched || stockQuantity.dirty)){
-                <div [class]="repetitiveStyles.validationErrorText">Stock quantity is required.</div>
-              }
-            </div>
-        </div>
+      </div>
 
-        <div class="flex items-center gap-2 text-gray-700">
-          <input id="isActive" type="checkbox" name="isActive" [(ngModel)]="product.isActive" class="w-4 h-4 cursor-pointer">
-          <label for="isActive" class="text-sm">Active</label>
-        </div>
+      <div class="flex items-start justify-between gap-4">
+        <div class="text-left w-[48%]">
 
-        <button type="submit" [disabled]="productForm.invalid"
-          class="w-full bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          Submit
-        </button>
-      </form>
-    </div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            Price <span class="text-red-500">*</span>
+          </label>
+
+          <div class="flex gap-2">
+
+            <!-- Price Input -->
+            <input type="number" min="1" max="100000" name="price" [(ngModel)]="product.price" required #price="ngModel"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition no-spinner">
+
+            <!-- Currency Select -->
+            <ng-select [items]="currencies" bindLabel="currencyCode" bindValue="currencyCode"
+              [(ngModel)]="product.currency" name="currency" placeholder="Currency" [searchable]="true"
+              [clearable]="false" [searchFn]="currencySearchFn" class="h-10 w-40 text-sm">
+
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.currencyCode }}
+              </ng-template>
+
+              <ng-template ng-option-tmp let-item="item">
+                <div class="flex flex-col">
+                  <span class="font-medium">{{ item.currencyCode }} - {{ item.currencyName }}</span>
+                  <span class="text-xs text-gray-500">{{ item.country }}</span>
+                </div>
+              </ng-template>
+
+            </ng-select>
+          </div>
+
+          @if(price.invalid && (price.touched || price.dirty)){
+          <div [class]="repetitiveStyles.validationErrorText">
+            Price is required.
+          </div>
+          }
+
+        </div>
+        <div class="text-left w-[48%]">
+          <label for="stockQuantity" class="block text-sm font-semibold text-gray-700 mb-1">Stock Quantity <span
+              class="text-red-500">*</span></label>
+          <input id="stockQuantity" type="number" min="1" max="1000" required name="stockQuantity"
+            [(ngModel)]="product.stockQuantity" #stockQuantity="ngModel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition no-spinner">
+          @if(stockQuantity.invalid && (stockQuantity.touched || stockQuantity.dirty)){
+          <div [class]="repetitiveStyles.validationErrorText">Stock quantity is required.</div>
+          }
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 text-gray-700">
+        <input id="isActive" type="checkbox" name="isActive" [(ngModel)]="product.isActive"
+          class="w-4 h-4 cursor-pointer">
+        <label for="isActive" class="text-sm">Active</label>
+      </div>
+
+      <button type="submit" [disabled]="productForm.invalid"
+        class="w-full bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+        Submit
+      </button>
+    </form>
   </div>
+</div>

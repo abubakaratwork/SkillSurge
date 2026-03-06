@@ -8,9 +8,7 @@
       </h1>
     </div>
 
-    <span
-      class="px-3 py-1 text-xs font-semibold rounded-full"
-      [ngClass]="product.isActive 
+    <span class="px-3 py-1 text-xs font-semibold rounded-full" [ngClass]="product.isActive 
         ? 'bg-green-100 text-green-700' 
         : 'bg-red-100 text-red-700'">
       {{ product.isActive ? 'Active' : 'Inactive' }}
@@ -32,27 +30,31 @@
   <!-- Details Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-    <!-- Category -->
-    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-      <p class="text-xs text-gray-500 uppercase mb-1">Category</p>
-      <p class="text-lg font-semibold text-gray-800">
-        {{ product.category?.name || 'No Category' }}
+    <!-- Category & SubCategory -->
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+      <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Category</p>
+
+      <p class="text-lg font-semibold text-gray-800 flex items-center gap-1">
+        <span>{{ product.category?.name || 'No Category' }}</span>
+        @if(product.subCategory?.name){
+        <span class="text-gray-400">/</span>
+        <span class="text-blue-500 font-medium">{{ product.subCategory?.name }}</span>
+        }
       </p>
     </div>
 
     <!-- Price -->
-    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
       <p class="text-xs text-gray-500 uppercase mb-1">Price</p>
       <p class="text-xl font-semibold text-indigo-600">
-        PKR {{ product.price | number:'1.2-2' }}
+        {{ product.price | spacedPrice:product.currency }}
       </p>
     </div>
 
     <!-- Stock -->
-    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
       <p class="text-xs text-gray-500 uppercase mb-1">Stock Quantity</p>
-      <p class="text-xl font-semibold"
-         [ngClass]="product.stockQuantity > 0 
+      <p class="text-xl font-semibold" [ngClass]="product.stockQuantity > 0 
            ? 'text-green-600' 
            : 'text-red-600'">
         {{ product.stockQuantity }}
@@ -60,7 +62,7 @@
     </div>
 
     <!-- Created At -->
-    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
       <p class="text-xs text-gray-500 uppercase mb-1">Created At</p>
       <p class="text-gray-800">
         {{ product.createdAt | date:'dd-MMM-yyyy hh:mm a' | uppercase }}
@@ -68,7 +70,7 @@
     </div>
 
     <!-- Updated At -->
-    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
       <p class="text-xs text-gray-500 uppercase mb-1">Last Updated</p>
       <p class="text-gray-800">
         {{ product.updatedAt | date:'dd-MMM-yyyy hh:mm a' | uppercase }}

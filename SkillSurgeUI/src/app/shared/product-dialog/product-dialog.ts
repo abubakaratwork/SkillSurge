@@ -7,12 +7,17 @@ import { UtilityService } from '../../core/services/utility.service';
 import { LocalAuthService } from '../../core/services/localauth.service';
 import { Category } from '../../core/models/interfaces/Category';
 import { LocalCategoryService } from '../../core/services/localcategory.service';
+import { MatIcon } from "@angular/material/icon";
+import { Currency } from '../../core/models/interfaces/Currency';
+import { LocalCurrencyService } from '../../core/services/localcurrency.service';
+import { LocalSubCategoryService } from '../../core/services/localsubcategory.service';
+import { SubCategory } from '../../core/models/interfaces/SubCategory';
 
 @Component({
   selector: 'app-product-dialog',
   imports: [
     FormsModule,
-    NgSelectComponent,
+    NgSelectComponent
   ],
   templateUrl: './product-dialog.html',
   styleUrl: './product-dialog.css',
@@ -25,13 +30,27 @@ export class ProductDialog {
 
   userId: string = '';
 
-  constructor(private dialogRef: MatDialogRef<ProductDialog>, @Inject(MAT_DIALOG_DATA) private dialogData: any, private utility: UtilityService, private authService: LocalAuthService, private categoryService: LocalCategoryService) {
-    this.userId = this.authService.user()?.id!;
+  constructor(
+    private dialogRef: MatDialogRef<ProductDialog>,
+    @Inject(MAT_DIALOG_DATA) private dialogData: any,
+    private utility: UtilityService,
+    private authService: LocalAuthService,
+    private categoryService: LocalCategoryService,
+    private subCategoryService: LocalSubCategoryService,
+    private currencyService: LocalCurrencyService
+  ) {
+    this.authService.user$.subscribe((u) => this.userId = u?.id!);
   }
 
   categories: Category[] = [];
+  subCategories: SubCategory[] = [];
 
   selectedCategory: string | null = null;
+  selectedSubCategory: string | null = null;
+
+  subCategoryRequired: boolean = false;
+
+  currencies: Currency[] = [];
 
   products: Product[] = [];
 
@@ -40,11 +59,13 @@ export class ProductDialog {
     name: '',
     description: '',
     price: 0,
+    currency: "PKR",
     stockQuantity: 0,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     categoryId: '',
+    subCategoryId: '',
     userId: ''
   };
 
@@ -53,10 +74,16 @@ export class ProductDialog {
   ngOnInit() {
     if (this.dialogData) {
       this.product = this.dialogData?.formData ?? this.product;
-      if (this.product.categoryId != null && this.product.categoryId != '') 
+      if (this.product.categoryId != null && this.product.categoryId != '')
         this.selectedCategory = this.product.categoryId;
-      this.categories = this.categoryService.getAll();
+      this.categories = this.categoryService.getAll().data ?? this.categories;
       this.dialogAction = this.dialogData?.action;
+      this.currencies = this.currencyService.getAll();
+
+      if (this.product.categoryId) {
+        this.selectedCategory = this.product.categoryId;
+        this.onCategoryChange(this.selectedCategory);
+      }
     }
   }
 
@@ -71,6 +98,7 @@ export class ProductDialog {
     product.id = this.dialogAction == 'create' ? this.utility.generateId() : product.id;
     product.createdAt = this.dialogAction == 'create' ? new Date() : product.createdAt;
     product.categoryId = this.selectedCategory!;
+    if(this.selectedSubCategory) product.subCategoryId = this.selectedSubCategory;
     product.updatedAt = new Date();
     if (this.dialogAction == 'create') product.userId = this.userId;
     this.dialogRef.close(this.product)
@@ -88,14 +116,46 @@ export class ProductDialog {
       name: '',
       description: '',
       price: 0,
+      currency: "PKR",
       stockQuantity: 0,
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
       categoryId: '',
+      subCategoryId: '',
       userId: ''
     };
 
     return product;
+  }
+
+  currencySearchFn(term: string, item: any) {
+    term = term.toLowerCase();
+
+    return (
+      item.country.toLowerCase().includes(term) ||
+      item.currencyCode.toLowerCase().includes(term) ||
+      item.currencyName.toLowerCase().includes(term)
+    );
+  }
+
+  onCategoryChange(categoryId: string | null) {
+    if (!categoryId) {
+      this.subCategories = [];
+      this.selectedSubCategory = null;
+      this.subCategoryRequired = false; // no subcategories => not required
+      return;
+    }
+
+    const result = this.subCategoryService.getByCurrencyId(categoryId);
+    if (result.isSuccess && result.data.length > 0) {
+      this.subCategories = result.data;
+      this.selectedSubCategory = null;
+      this.subCategoryRequired = true; // subcategories exist => required
+    } else {
+      this.subCategories = [];
+      this.selectedSubCategory = null;
+      this.subCategoryRequired = false; // no subcategories => not required
+    }
   }
 }

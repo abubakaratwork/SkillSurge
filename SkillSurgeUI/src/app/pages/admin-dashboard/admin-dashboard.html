@@ -1,0 +1,84 @@
+<section class="mt-12 px-6">
+
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Categories & SubCategories</h2>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+            <thead class="bg-gray-50">
+                <tr class="text-left text-gray-700">
+                    <th class="px-4 py-2 font-semibold text-nowrap"></th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Category Name</th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Description</th>
+                    <!-- <th class="px-4 py-2 font-semibold text-nowrap">Active</th> -->
+                    <th class="px-4 py-2 font-semibold text-nowrap">Created At</th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Updated At</th>
+                    <th class="px-4 py-2 font-semibold text-nowrap">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody class="bg-white divide-y divide-gray-200">
+
+                @for(category of categories; track categories){
+
+                <!-- Category row -->
+                <tr>
+                    <td class="px-4 py-2 text-center cursor-pointer" (click)="toggleSubCategories(category.id)">
+                        <mat-icon>{{ expandedCategories.includes(category.id) ? 'remove' : 'add' }}</mat-icon>
+                    </td>
+                    <td class="px-4 py-2 text-nowrap">{{ category.name }}</td>
+                    <td class="px-4 py-2 text-nowrap">{{ category.description || '-' }}</td>
+                    <!-- <td class="px-4 py-2" [class]="category.isActive ? 'text-green-500' : 'text-red-500'">
+                        <mat-icon>{{ category.isActive ? 'check' : 'close' }}</mat-icon>
+                    </td> -->
+                    <td class="px-4 py-2 text-nowrap">{{ category.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+                    <td class="px-4 py-2 text-nowrap">{{ category.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+                    <td class="px-4 py-2 flex gap-2 text-nowrap">
+                        <button (click)="editCategory(category.id)"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg flex items-center justify-center">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button (click)="deleteCategoryById(category.id)"
+                            class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg flex items-center justify-center">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- SubCategory rows -->
+                <!-- @if(expandedCategories.includes(category.id)){ -->
+                @for(sub of getSubCategories(category.id); track sub){
+                <tr class="bg-gray-50" [class.hidden]="!expandedCategories.includes(category.id)">
+                    <td></td> <!-- empty space for expand icon -->
+                    <td class="px-4 py-2 text-nowrap">{{ sub.name }}</td>
+                    <td class="px-4 py-2 text-nowrap">{{ sub.description || '-' }}</td>
+                    <!-- <td class="px-4 py-2" [class]="sub.isActive ? 'text-green-500' : 'text-red-500'">
+                                <mat-icon>{{ sub.isActive ? 'check' : 'close' }}</mat-icon>
+                            </td> -->
+                    <td class="px-4 py-2 text-nowrap">{{ sub.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+                    <td class="px-4 py-2 text-nowrap">{{ sub.udpatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+                    <td class="px-4 py-2 flex gap-2 text-nowrap">
+                        <button (click)="editSubCategory(sub.id)"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg flex items-center justify-center">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button (click)="deleteSubCategoryById(sub.id)"
+                            class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg flex items-center justify-center">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </tr>
+                }
+                }
+
+                <!-- } -->
+                @empty{
+                <tr>
+                    <td colspan="7" class="text-center py-6 text-gray-500">No Categories Found</td>
+                </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+</section>

@@ -1,6 +1,6 @@
 import { Component, effect, Inject } from '@angular/core';
 import { LocalProductService } from '../../core/services/localproduct.service';
-import { DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
@@ -9,17 +9,25 @@ import { ProductDialog } from '../../shared/product-dialog/product-dialog';
 import { Router } from '@angular/router';
 import { Product } from '../../core/models/interfaces/Product';
 import { LocalAuthService } from '../../core/services/localauth.service';
+import { ToastService } from '../../core/services/toast.service';
+import { SpacedPricePipe } from '../../core/pipes/spaced-price-pipe';
 
 @Component({
   selector: 'app-home',
-  imports: [DatePipe, FormsModule, MatIcon, NgSelectModule],
+  imports: [FormsModule, MatIcon, NgSelectModule, CommonModule, SpacedPricePipe],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
 export class Home {
-  constructor(private localProdService: LocalProductService, private productDialog: MatDialog, private route: Router, private authService: LocalAuthService) {
+  constructor(
+    private localProdService: LocalProductService,
+    private productDialog: MatDialog,
+    private route: Router,
+    private authService: LocalAuthService,
+    private toastr: ToastService
+  ) {
     effect(() => {
-      this.userId = this.authService.user()?.id!;
+      this.authService.user$.subscribe((u) => this.userId = u?.id!);
     })
   }
 
@@ -44,12 +52,12 @@ export class Home {
   product: Product | null = null;
 
   ngOnInit() {
-    this.products = this.localProdService.getAllByUser() ?? [];
+    this.products = this.localProdService.getAllByUser().data ?? [];
     this.product = this.defaultProduct();
   }
 
   refetch() {
-    this.products = this.localProdService.getAllByUser() ?? [];
+    this.products = this.localProdService.getAllByUser().data ?? [];
   }
 
   openModal(event = "create") {
@@ -59,35 +67,44 @@ export class Home {
 
     dialogRef.afterClosed().subscribe((data: Product | undefined) => {
       if (data) {
+        let res;
         if (event === 'create') {
-          this.localProdService.create(data);
+          res = this.localProdService.create(data);
         } else {
-          this.localProdService.update(data);
+          res = this.localProdService.update(data);
         }
-        this.refetch();
+        if (res && res.isSuccess) {
+          this.toastr.success(res.message);
+          this.refetch();
+        }
+        else {
+          this.toastr.error(res.message)
+        }
       }
     })
   }
 
   deleteProductById(id: string) {
-    this.localProdService.deleteById(id);
+    const res = this.localProdService.deleteById(id);
     this.refetch();
-    alert(`Product is deleted with id: ${id}`)
+    this.toastr.success(res.message);
   }
 
   edit(id: string) {
-    const existing = this.localProdService.getById(id);
+    const existing = this.localProdService.getById(id).data;
     this.product = existing ? existing : {
       id: '0000000-0000-0000-0000-0000000000000',
       name: '',
       description: '',
       price: 0,
+      currency: "PKR",
       stockQuantity: 0,
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: this.userId,
-      categoryId: ''
+      categoryId: '',
+      subCategoryId: '',
     };
 
     this.openModal("update");
@@ -106,12 +123,14 @@ export class Home {
       id: '',
       name: '',
       price: 0,
+      currency: "PKR",
       stockQuantity: 0,
       isActive: false,
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: this.userId!,
-      categoryId: ''
+      categoryId: '',
+      subCategoryId: '',
     };
     return product;
   }

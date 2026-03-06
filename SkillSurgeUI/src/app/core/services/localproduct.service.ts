@@ -3,6 +3,9 @@ import { Product } from "../models/interfaces/Product";
 import { LocalAuthService } from "./localauth.service";
 import { Router } from "@angular/router";
 import { LocalCategoryService } from "./localcategory.service";
+import { ResponseType } from "../models/responses/ResponseType";
+import { ResultService } from "./result.service";
+import { LocalSubCategoryService } from "./localsubcategory.service";
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +13,7 @@ import { LocalCategoryService } from "./localcategory.service";
 export class LocalProductService {
     private productKey: string = "products";
 
-    constructor(private authservice: LocalAuthService, private categoryService: LocalCategoryService, private route: Router) { }
+    constructor(private authService: LocalAuthService, private categoryService: LocalCategoryService, private subCategoryService: LocalSubCategoryService, private route: Router, private result: ResultService) { }
 
     private getAll(): Product[] {
         const item = localStorage.getItem(this.productKey);
@@ -19,52 +22,95 @@ export class LocalProductService {
         return products;
     }
 
-    getAllByUser(): Product[] | null {
-        if (!this.checkAuthentication()) return null;
-        
-        let products: Product[] = this.getAll();
-        products = products.filter(p => p.userId == this.authservice.user()?.id)
-        products = products.map(p => ({ ...p, category: this.categoryService.getById(p.categoryId) ?? undefined }))
-        return products
+    getAllByUser(): ResponseType<Product[]> {
+
+        const user = this.authService.getUserInfo();
+        if (!user)
+            return this.result.failure<Product[]>("User not authenticated.");
+
+        let products = this.getAll()
+            .filter(p => p.userId === user.id)
+            .map(p => {
+                const categoryResult = this.categoryService.getById(p.categoryId);
+                const subCategoryResult = this.subCategoryService.getById(p.subCategoryId);
+                return {
+                    ...p,
+                    category: categoryResult.data ?? undefined,
+                    subCategory: subCategoryResult.data ?? undefined
+                }
+            });
+
+        return this.result.success<Product[]>(products, "Products fetched successfully.");
     }
 
-    create(payload: any) {
-        if (!this.checkAuthentication()) return;
+    create(payload: Product): ResponseType<boolean> {
 
-        let products: Product[] = this.getAll();
-        products.push(payload);
+        const user = this.authService.getUserInfo();
+        if (!user)
+            return this.result.failure<boolean>("User not authenticated.");
+
+        const products = this.getAll();
+
+        products.push({
+            ...payload,
+            userId: user.id
+        });
+
         localStorage.setItem(this.productKey, JSON.stringify(products));
+
+        return this.result.success(true, "Product created successfully.");
     }
 
-    getById(id: string): Product | null {
-        if (!this.checkAuthentication()) return null;
-        
-        let products: Product[] = this.getAll();
-        const product = products.find(prod => prod.id == id);
-        if (product) return { ...product, category: this.categoryService.getById(product.categoryId) ?? undefined };
-        return null;
+    getById(id: string): ResponseType<Product | null> {
+
+        const user = this.authService.getUserInfo();
+        if (!user)
+            return this.result.failure<Product | null>("User not authenticated.");
+
+        const product = this.getAll().find(p => p.id === id);
+
+        if (!product)
+            return this.result.failure<Product | null>("Product not found.");
+
+        const categoryResult = this.categoryService.getById(product.categoryId);
+        const subSategoryResult = this.subCategoryService.getById(product.subCategoryId);
+        const resultProduct: Product = {
+            ...product,
+            category: categoryResult.data ?? undefined,
+            subCategory: subSategoryResult.data ?? undefined
+        };
+
+        return this.result.success<Product | null>(resultProduct, "Product fetched successfully.");
     }
 
-    deleteById(id: string) {
-        if (!this.checkAuthentication()) return;
+    deleteById(id: string): ResponseType<boolean> {
 
-        let products: Product[] = this.getAll();
-        const filteredProducts = products.filter(prod => prod.id != id);
+        const user = this.authService.getUserInfo();
+        if (!user)
+            return this.result.failure<boolean>("User not authenticated.");
+
+        const products = this.getAll();
+        const filteredProducts = products.filter(p => p.id !== id);
+
         localStorage.setItem(this.productKey, JSON.stringify(filteredProducts));
+
+        return this.result.success(true, "Product deleted successfully.");
     }
 
-    update(payload: any) {
-        if (!this.checkAuthentication()) return;
+    update(payload: Product): ResponseType<boolean> {
 
-        let products: Product[] = this.getAll();
-        const updatedProducts = products.map(prod => prod.id === payload.id ? { ...prod, ...payload } : prod);
+        const user = this.authService.getUserInfo();
+        if (!user)
+            return this.result.failure<boolean>("User not authenticated.");
+
+        const products = this.getAll();
+
+        const updatedProducts = products.map(p =>
+            p.id === payload.id ? { ...p, ...payload } : p
+        );
+
         localStorage.setItem(this.productKey, JSON.stringify(updatedProducts));
-    }
 
-    private checkAuthentication() {
-        if (this.authservice.isLoggedIn()) return true;
-
-        this.route.navigate(['/login']);
-        return false;
+        return this.result.success(true, "Product updated successfully.");
     }
 };

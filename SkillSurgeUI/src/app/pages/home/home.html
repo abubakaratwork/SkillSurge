@@ -16,7 +16,7 @@
           <th class="px-4 py-2 font-semibold text-nowrap">Name</th>
           <th class="px-4 py-2 font-semibold text-nowrap">Description</th>
           <th class="px-4 py-2 font-semibold text-nowrap">Category</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Price (PKR)</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Price</th>
           <th class="px-4 py-2 font-semibold text-nowrap">Stock Quantity</th>
           <th class="px-4 py-2 font-semibold text-nowrap">Active</th>
           <th class="px-4 py-2 font-semibold text-nowrap">Created At</th>
@@ -29,8 +29,14 @@
         <tr>
           <td class="px-4 py-2 text-nowrap">{{ product.name }}</td>
           <td class="px-4 py-2 text-nowrap">{{ product.description }}</td>
-          <td class="px-4 py-2 text-nowrap">{{ product.category?.name || 'Not selected' }}</td>
-          <td class="px-4 py-2 text-nowrap">{{ product.price }}</td>
+          <td class="px-4 py-2 text-nowrap">{{ product.category?.name || 'Not selected' }}
+            @if(product.subCategory?.name){
+            / {{ product.subCategory?.name}}
+            }
+          </td>
+          <td class="px-4 py-2 text-nowrap">
+            {{ product.price | spacedPrice:product.currency }}
+          </td>
           <td class="px-4 py-2 text-nowrap">{{ product.stockQuantity }}</td>
           <td class="px-4 py-2 text-nowrap text-green-500"
             [class]="product.isActive ? 'text-green-500' : 'text-red-500'">

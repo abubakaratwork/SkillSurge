@@ -1,25 +1,52 @@
 <aside class="bg-white border-r border-gray-200 h-full flex flex-col transition-all duration-300"
-       [ngClass]="isCollapsed ? 'w-16' : 'w-64'">
+  [ngClass]="isCollapsed ? 'w-16' : 'w-64'">
 
-  <nav class="flex-1 flex flex-col mt-4">
+  <nav class="flex-1 flex flex-col mt-4 text-gray-800">
     @for(item of navItems; track item){
-      <a [routerLink]="item.link" routerLinkActive="bg-gray-100 text-primary"
-         class="flex items-center gap-3 pl-4 pr-2 py-3 hover:bg-gray-100 transition-colors text-gray-700 font-medium">
+    <a [routerLink]="item.link" routerLinkActive="bg-gray-100 text-primary"
+      class="flex items-center gap-3 pl-5 pr-2 py-3 hover:bg-gray-100 transition-colors text-gray-700 font-medium">
 
-        <mat-icon>{{ item.icon }}</mat-icon>
+      <mat-icon>{{ item.icon }}</mat-icon>
 
-        <span class="overflow-hidden whitespace-nowrap transition-all duration-300"
-              [style.maxWidth]="!isCollapsed ? '200px' : '0px'"
-              [style.opacity]="!isCollapsed ? '1' : '0'"
-              [style.transitionDelay]="!isCollapsed ? (50 * navItems.indexOf(item)) + 'ms' : '0ms'"
-              [ngClass]="{'pointer-events-none': isCollapsed}">
-          @if(!isCollapsed){
-            {{ item.label }}
-          }
-        </span>
+      <span class="overflow-hidden whitespace-nowrap text-sm font-semibold  transition-all duration-300"
+        [style.maxWidth]="!isCollapsed ? '200px' : '0px'" [style.opacity]="!isCollapsed ? '1' : '0'"
+        [style.transitionDelay]="!isCollapsed ? (50 * navItems.indexOf(item)) + 'ms' : '0ms'"
+        [ngClass]="{'pointer-events-none': isCollapsed}">
+        @if(!isCollapsed){
+        {{ item.label }}
+        }
+      </span>
 
-      </a>
+    </a>
     }
   </nav>
 
+  <footer class="border-t border-gray-200 p-3 bg-white">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="bg-primary/10 text-primary p-2 rounded-full flex items-center justify-center">
+          <mat-icon>person</mat-icon>
+        </div>
+
+        <div class="leading-tight overflow-hidden whitespace-nowrap transition-all duration-300"
+          [style.maxWidth]="!isCollapsed ? '160px' : '0px'" [style.opacity]="!isCollapsed ? '1' : '0'">
+          @if(!isCollapsed){
+          <p class="text-sm font-semibold text-gray-800 truncate">
+            {{ userName | titlecase }}
+          </p>
+          <p class="text-xs text-gray-500 truncate">
+            {{ email }}
+          </p>
+          }
+
+        </div>
+      </div>
+
+      <button
+        class="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-gray-100 transition-all flex items-center justify-center cursor-pointer"
+        (click)="logout()">
+        <mat-icon class="text-[20px]">logout</mat-icon>
+      </button>
+    </div>
+  </footer>
 </aside>
