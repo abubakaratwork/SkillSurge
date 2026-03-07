@@ -1,4 +1,4 @@
-﻿namespace Services.Abstractions.Services;
+﻿namespace Services.Services;
 
 public class AdminService : IAdminService
 {

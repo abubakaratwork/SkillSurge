@@ -1,4 +1,4 @@
-﻿namespace Domain.Repositories;
+﻿namespace Services.Abstractions.Services;
 
 public interface IRoleService
 {

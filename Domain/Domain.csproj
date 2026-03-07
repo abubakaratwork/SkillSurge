@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Enums\" />
+    <Folder Include="Models\Requests\UserRequests\" />
+    <Folder Include="Models\Requests\ProductRequests\" />
+    <Folder Include="Settings\" />
+  </ItemGroup>
+
 </Project>
