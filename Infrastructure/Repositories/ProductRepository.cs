@@ -10,10 +10,10 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
         
             SELECT *
             FROM Products
-            WHERE IsDeleted = FALSE
+            WHERE IsDeleted = 0
             ORDER BY CreatedAt DESC
-            LIMIT @PageSize
-            OFFSET @Offset
+            OFFSET @Offset ROWS
+            FETCH NEXT @PageSize ROWS ONLY;
         
         """;
 
@@ -34,7 +34,7 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
             SELECT *
             FROM Products
             WHERE Id = @Id
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
         
         """;
 
@@ -51,7 +51,7 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
             SELECT *
             FROM Products
             WHERE CategoryId = @CategoryId
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
         
         """;
 
@@ -68,7 +68,7 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
             SELECT *
             FROM Products
             WHERE OwnerId = @OwnerId
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
         
         """;
 
@@ -148,7 +148,7 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
                 CategoryId = @CategoryId,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
         
         """;
 
@@ -164,11 +164,11 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
         
             UPDATE Products
             SET IsDeleted = TRUE,
-                UpdatedAt = NOW()
+                UpdatedAt = @Now
             WHERE Id = @Id
         
         """;
 
-        await connection.ExecuteAsync(sql, new { Id = id });
+        await connection.ExecuteAsync(sql, new { Id = id, Now = DateTime.UtcNow });
     }
 }

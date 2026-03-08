@@ -56,10 +56,9 @@ public class RoleRepository(DbConnectionFactory factory) : IRoleRepository
 
         var sql = """
         
-            SELECT *
+            SELECT TOP 1 *
             FROM Roles
             ORDER BY Level ASC
-            LIMIT 1
         
         """;
 

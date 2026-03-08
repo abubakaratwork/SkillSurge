@@ -1,4 +1,6 @@
-﻿namespace Persistence.Repositories;
+﻿using Domain.Models.DTOs;
+
+namespace Persistence.Repositories;
 
 public class CategoryRepository(DbConnectionFactory factory) : ICategoryRepository
 {
@@ -10,7 +12,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             
             SELECT *
             FROM Categories
-            WHERE IsDeleted = FALSE
+            WHERE IsDeleted = 0
             ORDER BY Name
             
             """;
@@ -18,36 +20,50 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
         return await connection.QueryAsync<Category>(sql);
     }
 
-    public async Task<IEnumerable<Category>> GetRootCategoriesAsync()
+    public async Task<IEnumerable<CategoryDetails>> GetRootCategoriesAsync()
     {
         using var connection = factory.CreateConnection();
 
         var sql = """
             
-            SELECT *
+            SELECT 
+              Id,
+              Name,
+              Description,
+              CreatedAt,
+              UpdatedAt
             FROM Categories
             WHERE ParentCategoryId IS NULL
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
             
             """;
 
-        return await connection.QueryAsync<Category>(sql);
+        return await connection.QueryAsync<CategoryDetails>(sql);
     }
 
-    public async Task<IEnumerable<Category>> GetChildrenAsync(Guid parentId)
+    public async Task<IEnumerable<SubCategoryDetails>> GetChildrenAsync(Guid parentId)
     {
         using var connection = factory.CreateConnection();
 
-        var sql = """
+        var sql = $"""
             
-            SELECT *
-            FROM Categories
-            WHERE ParentCategoryId = @ParentId
-              AND IsDeleted = FALSE
+            SELECT 
+                s.Id,
+                s.Name,
+                s.Description,
+                s.ParentCategoryId,
+                s.CreatedAt,
+                s.UpdatedAt,
+                p.Name AS ParentCategoryName
+            FROM Categories AS s
+            INNER JOIN Categories AS p
+                ON s.ParentCategoryId = p.Id
+            WHERE s.ParentCategoryId = @ParentId
+              AND s.IsDeleted = 0
             
             """;
 
-        return await connection.QueryAsync<Category>(sql, new { ParentId = parentId });
+        return await connection.QueryAsync<SubCategoryDetails>(sql, new { ParentId = parentId });
     }
 
     public async Task<Category?> GetByIdAsync(Guid id)
@@ -59,7 +75,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             SELECT *
             FROM Categories
             WHERE Id = @Id
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
             
             """;
 
@@ -75,7 +91,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             SELECT *
             FROM Categories
             WHERE Name = @Name
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
             
             """;
 
@@ -129,7 +145,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
                 UpdatedBy = @UpdatedBy,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id
-              AND IsDeleted = FALSE
+              AND IsDeleted = 0
             
             """;
 
@@ -144,9 +160,9 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             
             UPDATE Categories
             SET
-                IsDeleted = TRUE,
+                IsDeleted = 1,
                 UpdatedBy = @DeletedBy,
-                UpdatedAt = NOW()
+                UpdatedAt = @Now
             WHERE Id = @Id
             
             """;
@@ -154,7 +170,8 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
         await connection.ExecuteAsync(sql, new
         {
             Id = id,
-            DeletedBy = deletedBy
+            DeletedBy = deletedBy,
+            Now = DateTime.UtcNow
         });
     }
 }

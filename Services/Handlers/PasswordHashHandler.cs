@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Services.Helpers;
+namespace Services.Handlers;
 
 public class PasswordHashHandler
 {

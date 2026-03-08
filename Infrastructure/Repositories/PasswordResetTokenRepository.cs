@@ -12,11 +12,11 @@ public class PasswordResetTokenRepository(DbConnectionFactory factory) : IPasswo
             FROM PasswordResetTokens
             WHERE Token = @Token
               AND IsUsed = 0
-              AND ExpiresAt > NOW()
+              AND ExpiresAt > @Now
             
             """;
 
-        return await connection.QueryFirstOrDefaultAsync<PasswordResetToken>(sql, new { Token = token });
+        return await connection.QueryFirstOrDefaultAsync<PasswordResetToken>(sql, new { Token = token, Now = DateTime.UtcNow });
     }
 
     public async Task AddAsync(PasswordResetToken token)
@@ -71,11 +71,11 @@ public class PasswordResetTokenRepository(DbConnectionFactory factory) : IPasswo
         var sql = """
             
             DELETE FROM PasswordResetTokens
-            WHERE ExpiresAt < NOW()
+            WHERE ExpiresAt < @Now
                OR IsUsed = 1
             
             """;
 
-        await connection.ExecuteAsync(sql);
+        await connection.ExecuteAsync(sql, new { Now = DateTime.UtcNow });
     }
 }

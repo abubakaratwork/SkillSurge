@@ -8,4 +8,3 @@ public class Category : AuditableEntity
     public Guid? ParentCategoryId { get; set; }
     public bool IsDeleted { get; set; }
 }
-

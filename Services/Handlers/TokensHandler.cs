@@ -1,25 +1,20 @@
-﻿using Domain.Entities;
-using Microsoft.Extensions.Configuration;
+﻿using Domain.Settings;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Services.Helpers;
+namespace Services.Handlers;
 
-public class TokensHandler
+public class TokensHandler(IOptions<JwtSettings> options)
 {
-    private readonly IConfiguration _configuration;
-
-    public TokensHandler(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
+    private readonly JwtSettings settings = options.Value;
 
     public string GenerateAccessToken(User user, Role role)
     {
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
+        var key = Encoding.UTF8.GetBytes(settings.Key!);
 
         var claims = new List<Claim>
         {
@@ -36,11 +31,11 @@ public class TokensHandler
         );
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: settings.Issuer,
+            audience: settings.Audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(
-                Convert.ToDouble(_configuration["Jwt:AccessTokenExpirationMinutes"])
+                Convert.ToDouble(settings.AccessTokenExpirationMinutes)
             ),
             signingCredentials: credentials
         );
@@ -64,13 +59,13 @@ public class TokensHandler
 
     public DateTime GetRefreshTokenExpiry()
     {
-        var days = Convert.ToInt32(_configuration["Jwt:RefreshTokenExpirationDays"]);
+        var days = Convert.ToInt32(settings.RefreshTokenExpirationDays);
         return DateTime.UtcNow.AddDays(days);
     }
 
     public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
+        var key = Encoding.UTF8.GetBytes(settings.Key);
 
         var tokenValidationParameters = new TokenValidationParameters
         {

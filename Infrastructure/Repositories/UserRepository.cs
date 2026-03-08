@@ -11,8 +11,8 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
             SELECT *
             FROM Users
             ORDER BY CreatedAt DESC
-            LIMIT @PageSize
-            OFFSET @Offset
+            OFFSET @Offset ROWS
+            FETCH NEXT @PageSize ROWS ONLY
         
         """;
 
@@ -114,7 +114,7 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
             UPDATE Users
             SET
                 PasswordHash = @PasswordHash,
-                UpdatedAt = NOW()
+                UpdatedAt = @Now
             WHERE Id = @UserId
         
         """;
@@ -122,7 +122,8 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
         await connection.ExecuteAsync(sql, new
         {
             UserId = userId,
-            PasswordHash = passwordHash
+            PasswordHash = passwordHash,
+            Now = DateTime.UtcNow
         });
     }
 
@@ -135,7 +136,7 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
             UPDATE Users
             SET
                 RoleId = @RoleId,
-                UpdatedAt = NOW()
+                UpdatedAt = @Now
             WHERE Id = @UserId
         
         """;
@@ -143,7 +144,8 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
         await connection.ExecuteAsync(sql, new
         {
             UserId = userId,
-            RoleId = roleId
+            RoleId = roleId,
+            Now = DateTime.UtcNow
         });
     }
 
@@ -154,12 +156,12 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
         var sql = """
         
             UPDATE Users
-            SET LastLoginAt = NOW()
+            SET LastLoginAt = @Now
             WHERE Id = @UserId
         
         """;
 
-        await connection.ExecuteAsync(sql, new { UserId = userId });
+        await connection.ExecuteAsync(sql, new { UserId = userId, Now = DateTime.UtcNow });
     }
 
     public async Task ActivateAsync(Guid userId)
@@ -169,13 +171,13 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
         var sql = """
         
             UPDATE Users
-            SET IsActive = TRUE,
-                UpdatedAt = NOW()
+            SET IsActive = 1,
+                UpdatedAt = @Now
             WHERE Id = @UserId
         
         """;
 
-        await connection.ExecuteAsync(sql, new { UserId = userId });
+        await connection.ExecuteAsync(sql, new { UserId = userId, Now = DateTime.UtcNow });
     }
 
     public async Task DeactivateAsync(Guid userId)
@@ -185,13 +187,13 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
         var sql = """
         
             UPDATE Users
-            SET IsActive = FALSE,
-                UpdatedAt = NOW()
+            SET IsActive = 0,
+                UpdatedAt = @Now
             WHERE Id = @UserId
         
         """;
 
-        await connection.ExecuteAsync(sql, new { UserId = userId });
+        await connection.ExecuteAsync(sql, new { UserId = userId, Now = DateTime.UtcNow });
     }
 
 

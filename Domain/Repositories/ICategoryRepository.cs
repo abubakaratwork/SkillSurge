@@ -1,10 +1,12 @@
-﻿namespace Domain.Repositories;
+﻿using Domain.Models.DTOs;
+
+namespace Domain.Repositories;
 
 public interface ICategoryRepository
 {
     Task<IEnumerable<Category>> GetAllAsync();
-    Task<IEnumerable<Category>> GetRootCategoriesAsync();
-    Task<IEnumerable<Category>> GetChildrenAsync(Guid parentId);
+    Task<IEnumerable<CategoryDetails>> GetRootCategoriesAsync();
+    Task<IEnumerable<SubCategoryDetails>> GetChildrenAsync(Guid parentId);
     Task<Category?> GetByIdAsync(Guid id);
     Task<Category?> GetByNameAsync(string name);
     Task AddAsync(Category category);

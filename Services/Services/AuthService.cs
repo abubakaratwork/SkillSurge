@@ -1,11 +1,4 @@
-﻿using Domain.Entities;
-using Domain.Models.Requests.AuthRequests;
-using Domain.Models.Responses;
-using Domain.Models.Responses.AuthResponses;
-using Domain.Repositories;
-using Services.Helpers;
-
-namespace Services.Services;
+﻿namespace Services.Services;
 
 public class AuthService(
     IUserRepository userRepository,
@@ -13,11 +6,19 @@ public class AuthService(
     IRefreshTokenRepository refreshTokenRepository,
     IPasswordResetTokenRepository passwordResetTokenRepository,
     PasswordHashHandler passwordHasher,
-    TokensHandler tokenHandler
+    TokensHandler tokenHandler,
+    IValidator<LoginRequest> loginValidator,
+    IValidator<SignupRequest> signuppValidator,
+    IValidator<ForgotPasswordRequest> forgotPasswordValidator,
+    IValidator<ResetPasswordRequest> resetPasswordValidator
 ) : IAuthService
 {
     public async Task<Result<bool>> SignupAsync(SignupRequest request)
     {
+        var validationResult = await signuppValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var existingUser = await userRepository.GetByEmailAsync(request.Email);
 
         if (existingUser is not null)
@@ -28,9 +29,9 @@ public class AuthService(
         var user = new User
         {
             Id = Guid.NewGuid(),
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Email = request.Email,
+            FirstName = request.FirstName.Trim(),
+            LastName = request.LastName.Trim(),
+            Email = request.Email.Trim(),
             PasswordHash = passwordHasher.HashPassword(request.Password),
             RoleId = role.Id,
             CreatedAt = DateTime.UtcNow
@@ -43,6 +44,10 @@ public class AuthService(
 
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
     {
+        var validationResult = await loginValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var user = await userRepository.GetByEmailAsync(request.Email);
 
         if (user is null)
@@ -74,7 +79,6 @@ public class AuthService(
 
         await refreshTokenRepository.AddAsync(refreshToken);
 
-        user.LastLoginAt = DateTime.UtcNow;
         await userRepository.UpdateLastLoginAsync(user.Id);
 
         var response = new LoginResponse
@@ -120,6 +124,10 @@ public class AuthService(
 
     public async Task<Result<bool>> ForgotPasswordAsync(ForgotPasswordRequest request)
     {
+        var validationResult = await forgotPasswordValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var user = await userRepository.GetByEmailAsync(request.Email);
 
         if (user is null)
@@ -146,6 +154,10 @@ public class AuthService(
 
     public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordRequest request)
     {
+        var validationResult = await resetPasswordValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var token = await passwordResetTokenRepository.GetByTokenAsync(request.Token);
 
         if (token is null)
