@@ -1,22 +1,26 @@
-﻿namespace Persistence.Repositories;
+﻿using Domain.Models.DTOs;
+
+namespace Persistence.Repositories;
 
 public class UserRepository(DbConnectionFactory factory) : IUserRepository
 {
-    public async Task<IEnumerable<User>> GetAllAsync(int page, int pageSize)
+    public async Task<IEnumerable<UserDetails>> GetAllAsync(int page, int pageSize)
     {
         using var connection = factory.CreateConnection();
 
         var sql = """
         
-            SELECT *
-            FROM Users
-            ORDER BY CreatedAt DESC
+            SELECT u.*, r.Name AS Role
+            FROM Users u
+            LEFT JOIN Roles r
+            ON u.RoleId = r.Id
+            ORDER BY u.CreatedAt DESC
             OFFSET @Offset ROWS
             FETCH NEXT @PageSize ROWS ONLY
         
         """;
 
-        return await connection.QueryAsync<User>(sql, new
+        return await connection.QueryAsync<UserDetails>(sql, new
         {
             PageSize = pageSize,
             Offset = (page - 1) * pageSize
@@ -36,6 +40,28 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
         """;
 
         return await connection.QueryFirstOrDefaultAsync<User>(sql, new { Id = id });
+    }
+
+    public async Task<UserProfile?> GetProfileByIdAsync(Guid id)
+    {
+        using var connection = factory.CreateConnection();
+
+        var sql = """
+        
+            SELECT 
+                u.Id, 
+                u.FirstName,
+                u.LastName,
+                u.Email,
+                r.Name AS Role
+            FROM Users u
+            INNER JOIN Roles r
+            ON u.RoleId = r.Id
+            WHERE u.Id = @Id
+        
+        """;
+
+        return await connection.QueryFirstOrDefaultAsync<UserProfile>(sql, new { Id = id });
     }
 
     public async Task<User?> GetByEmailAsync(string email)

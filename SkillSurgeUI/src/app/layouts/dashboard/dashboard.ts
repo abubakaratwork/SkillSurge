@@ -3,8 +3,8 @@ import { RouterOutlet } from "@angular/router";
 import { Header } from '../../shared/header/header';
 import { Footer } from '../../shared/footer/footer';
 import { Sidebar } from '../../shared/sidebar/sidebar';
-import { LocalAuthService } from '../../core/services/localauth.service';
 import { RoleTypes } from '../../core/models/interfaces/User';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,10 +15,10 @@ import { RoleTypes } from '../../core/models/interfaces/User';
 export class Dashboard {
   sidebarCollapsed = false;
 
-  constructor(private authService: LocalAuthService) { }
+  constructor(private userService: UserService) { }
 
   headerNavLink: any = null;
-  userRole: RoleTypes = RoleTypes.user;
+  userRole: string = RoleTypes.user.toString();
 
   sidebarNavItems = [
     { label: 'Dashboard', link: '/home', icon: 'dashboard' },
@@ -28,8 +28,10 @@ export class Dashboard {
   ];
 
   ngOnInit() {
-    this.authService.user$.subscribe((u) => this.userRole = u?.role ?? RoleTypes.user)
-    if (this.userRole == RoleTypes.admin) {
+    this.userService.userProfile$.subscribe((u) => {
+      this.userRole = u?.role.toLowerCase() ?? RoleTypes.user.toString();
+    })
+    if (this.userRole == RoleTypes.admin.toString()) {
       this.headerNavLink = {
         label: "Go to Admin Portal",
         link: "/admin/dashboard"

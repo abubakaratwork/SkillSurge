@@ -21,6 +21,6 @@ export class Admin {
   sidebarNavItems = [
     { label: 'Dashboard', link: '/admin/dashboard', icon: 'dashboard' },
     { label: 'Categories', link: '/admin/categories', icon: 'category' },
-    { label: 'Sub Categories', link: '/admin/sub-categories', icon: 'inventory_2' },
+    { label: 'Users', link: '/admin/users', icon: 'persons' },
   ];
 }

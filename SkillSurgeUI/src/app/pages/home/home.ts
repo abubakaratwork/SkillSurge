@@ -8,9 +8,11 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { ProductDialog } from '../../shared/product-dialog/product-dialog';
 import { Router } from '@angular/router';
 import { Product } from '../../core/models/interfaces/Product';
-import { LocalAuthService } from '../../core/services/localauth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SpacedPricePipe } from '../../core/pipes/spaced-price-pipe';
+import { ProductService } from '../../core/services/product.service';
+import { CreateProductRequest, UpdateProductRequest } from '../../core/models/requests/ProductRequests';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-home',
@@ -21,29 +23,18 @@ import { SpacedPricePipe } from '../../core/pipes/spaced-price-pipe';
 export class Home {
   constructor(
     private localProdService: LocalProductService,
+    private prodService: ProductService,
     private productDialog: MatDialog,
     private route: Router,
-    private authService: LocalAuthService,
+    private userService: UserService,
     private toastr: ToastService
-  ) {
-    effect(() => {
-      this.authService.user$.subscribe((u) => this.userId = u?.id!);
-    })
-  }
+  ) { }
 
   userId: string = '';
 
   repetitiveStyles = {
     validationErrorText: 'text-red-500 text-sm mt-1'
   }
-
-  cities = [
-    { id: 1, name: 'Karachi' },
-    { id: 2, name: 'Lahore' },
-    { id: 3, name: 'Islamabad' }
-  ];
-
-  selectedCity: number | null = null;
 
   products: Product[] = [];
   isModalOpen = false;
@@ -52,62 +43,97 @@ export class Home {
   product: Product | null = null;
 
   ngOnInit() {
-    this.products = this.localProdService.getAllByUser().data ?? [];
+    this.userService.userProfile$.subscribe((u) => this.userId = u?.id!);
+    // this.products = this.localProdService.getAllByUser().data ?? [];
     this.product = this.defaultProduct();
+    this.prodService.getAll().subscribe((data) => {
+      this.products = data.data ?? []
+    });
   }
 
   refetch() {
-    this.products = this.localProdService.getAllByUser().data ?? [];
+    // this.products = this.localProdService.getAllByUser().data ?? [];
+    this.prodService.getAll().subscribe((data) => {
+      this.products = data.data ?? []
+    });
   }
 
-  openModal(event = "create") {
+  openModal(event = "create", productId?: string) {
     let dialogRef = event === 'create' ?
-      this.productDialog.open(ProductDialog, { data: { formData: null, action: event }, autoFocus: false }) :
-      this.productDialog.open(ProductDialog, { data: { formData: this.product, action: event }, autoFocus: false });
+      this.productDialog.open(ProductDialog, { data: { productId: null, action: event }, autoFocus: false }) :
+      this.productDialog.open(ProductDialog, { data: { productId: productId, action: event }, autoFocus: false });
 
     dialogRef.afterClosed().subscribe((data: Product | undefined) => {
       if (data) {
-        let res;
+        // let res;
         if (event === 'create') {
-          res = this.localProdService.create(data);
+          const payload: CreateProductRequest = {
+            name: data?.name,
+            description: data.description,
+            price: data.price,
+            stockQuantity: data.stockQuantity,
+            currency: data?.currency,
+            isActive: data?.isActive,
+            categoryId: data.subCategoryId
+          }
+          this.prodService.createProduct(payload).subscribe({
+            next: (res) => {
+              console.log(res);
+              if (res.success) {
+                this.toastr.success(res.message)
+                this.refetch();
+              }
+            }
+          })
+          // res = this.localProdService.create(data);
         } else {
-          res = this.localProdService.update(data);
+          const payload: UpdateProductRequest = {
+            name: data.name,
+            description: data.description,
+            price: data.price,
+            stockQuantity: data.stockQuantity,
+            currency: data?.currency,
+            isActive: data?.isActive,
+            categoryId: data.subCategoryId
+          }
+          this.prodService.updateProduct(data.id, payload).subscribe({
+            next: (res) => {
+              console.log(res);
+              if (res.success) {
+                this.toastr.success(res.message)
+                this.refetch();
+              }
+            }
+          })
+          // res = this.localProdService.update(data);
         }
-        if (res && res.isSuccess) {
-          this.toastr.success(res.message);
-          this.refetch();
-        }
-        else {
-          this.toastr.error(res.message)
-        }
+        // if (res && res.isSuccess) {
+        //   this.toastr.success(res.message);
+        //   this.refetch();
+        // }
+        // else {
+        //   this.toastr.error(res.message)
+        // }
       }
     })
   }
 
   deleteProductById(id: string) {
-    const res = this.localProdService.deleteById(id);
-    this.refetch();
-    this.toastr.success(res.message);
+    const res = this.prodService.deleteProduct(id).subscribe({
+      next: res => {
+        if (res.success) {
+          this.refetch();
+          this.toastr.success(res.message);
+        }
+      },
+      error: err => {
+        this.toastr.success(err.error?.message);
+      }
+    });
   }
 
   edit(id: string) {
-    const existing = this.localProdService.getById(id).data;
-    this.product = existing ? existing : {
-      id: '0000000-0000-0000-0000-0000000000000',
-      name: '',
-      description: '',
-      price: 0,
-      currency: "PKR",
-      stockQuantity: 0,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      userId: this.userId,
-      categoryId: '',
-      subCategoryId: '',
-    };
-
-    this.openModal("update");
+    this.openModal("update", id);
   }
 
   formatId(id: string) {

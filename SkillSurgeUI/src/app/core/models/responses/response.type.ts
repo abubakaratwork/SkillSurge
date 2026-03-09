@@ -1,5 +1,5 @@
 export interface TypedResponse<responseType> {
-    isSuccess : boolean,
+    success : boolean,
     message : string,
     data : responseType | null
 }

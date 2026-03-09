@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatIcon } from "@angular/material/icon";
-import { LocalAuthService } from '../../core/services/localauth.service';
-import { filter } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -17,16 +16,9 @@ export class Header {
   isOnAdminDashboard: boolean = false;
 
   isAuthenticated: boolean = false;
-  constructor(private router: Router, private authService: LocalAuthService) { }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+  constructor(private router: Router, private authService: AuthService) { }
 
   ngOnInit() {
-    this.isAuthenticated = this.authService.isLoggedIn();
-
     this.isOnAdminDashboard = this.router.url.includes('/admin');
   }
 }

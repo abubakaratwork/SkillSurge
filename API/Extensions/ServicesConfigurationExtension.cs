@@ -78,10 +78,22 @@ public static class ServicesConfigurationExtension
                 policy.RequireRole("SuperAdmin"));
         });
 
+        var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+        services.AddCors(options =>
+        {
+            options.AddPolicy("DefaultCors", policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
+        });
+
         services.AddSingleton<ExceptionHandlingMiddleware>();
 
         services.AddServicesDI(configuration)
-            .AddPersistenceDI(configuration);
+                .AddPersistenceDI(configuration);
 
         return services;
     }

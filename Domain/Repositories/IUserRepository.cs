@@ -1,9 +1,12 @@
-﻿namespace Domain.Repositories;
+﻿using Domain.Models.DTOs;
+
+namespace Domain.Repositories;
 
 public interface IUserRepository
 {
-    Task<IEnumerable<User>> GetAllAsync(int page, int pageSize);
-    Task<User?> GetByIdAsync(Guid id);
+    Task<IEnumerable<UserDetails>> GetAllAsync(int page, int pageSize);
+    Task<UserProfile?> GetProfileByIdAsync(Guid id);
+    Task<User> GetByIdAsync(Guid id);
     Task<User?> GetByEmailAsync(string email);
     Task AddAsync(User user);
     Task UpdateAsync(User user);

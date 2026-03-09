@@ -25,11 +25,13 @@ export class CategoryDialog {
     validationErrorText: 'text-red-500 text-sm mt-1'
   }
 
+  isSubCategory: boolean = false;
+
   category: Category = {
     id: '',
     name: '',
     description: '',
-    // isActive: true,
+    isActive: true,
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -39,6 +41,10 @@ export class CategoryDialog {
   ngOnInit() {
     if (this.dialogData) {
       this.category = this.dialogData?.formData ?? this.category;
+      if (this.dialogData.parentId) {
+        this.isSubCategory = true;
+        this.category.parentCategoryId = this.dialogData.parentId;
+      }
       this.dialogAction = this.dialogData?.action ?? 'create';
     }
   }
@@ -69,7 +75,8 @@ export class CategoryDialog {
       id: '',
       name: '',
       description: '',
-      // isActive: true,
+      parentCategoryId: '',
+      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
     };

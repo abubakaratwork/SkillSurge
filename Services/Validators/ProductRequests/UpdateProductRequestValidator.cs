@@ -16,10 +16,11 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
         RuleFor(x => x.StockQuantity)
             .GreaterThanOrEqualTo(0).WithMessage("Stock quantity cannot be negative.");
 
+        RuleFor(x => x.Currency)
+            .NotEmpty().WithMessage("Currency is required.")
+            .Matches("^[A-Z]{3}$").WithMessage("Currency must be a 3-letter uppercase code.");
+
         RuleFor(x => x.CategoryId)
             .NotEmpty().WithMessage("CategoryId is required.");
-
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("UserId is required.");
     }
 }

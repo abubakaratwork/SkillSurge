@@ -1,4 +1,6 @@
-﻿namespace Services.Services;
+﻿using Domain.Models.DTOs;
+
+namespace Services.Services;
 
 public class ProductService(
     IProductRepository productRepository,
@@ -19,6 +21,8 @@ public class ProductService(
             Description = request.Description,
             Price = request.Price,
             StockQuantity = request.StockQuantity,
+            Currency = request.Currency,
+            IsActive = request.IsActive,
             CategoryId = request.CategoryId,
             OwnerId = request.UserId,
             CreatedAt = DateTime.UtcNow,
@@ -52,18 +56,18 @@ public class ProductService(
         return Result<List<Product>>.SuccessResult(products.ToList(), "Products fetched successfully.");
     }
 
-    public async Task<Result<List<Product>>> GetMyProductsAsync(Guid userId)
+    public async Task<Result<List<ProductDetails>>> GetMyProductsAsync(Guid userId)
     {
         var products = await productRepository.GetByOwnerAsync(userId);
 
-        return Result<List<Product>>.SuccessResult(products.ToList(), "");
+        return Result<List<ProductDetails>>.SuccessResult(products.ToList(), "Products fetched successfully.");
     }
 
     public async Task<Result<Product>> GetProductByIdAsync(Guid id)
     {
         var product = await productRepository.GetByIdAsync(id);
 
-        if (product == null || product.IsDeleted)
+        if (product == null)
             return Result<Product>.FailureResult("Product not found");
 
         return Result<Product>.SuccessResult(product, "Product fetched successfully.");
@@ -86,6 +90,8 @@ public class ProductService(
         product.Name = request.Name;
         product.Description = request.Description;
         product.Price = request.Price;
+        product.Currency = request.Currency;
+        product.IsActive = request.IsActive;
         product.StockQuantity = request.StockQuantity;
         product.CategoryId = request.CategoryId;
         product.UpdatedAt = DateTime.UtcNow;

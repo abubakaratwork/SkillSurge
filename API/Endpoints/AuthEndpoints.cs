@@ -11,6 +11,8 @@ public static class AuthEndpoints
 
         endpoints.MapPost("signup", SignupAsync);
 
+        endpoints.MapPost("logout", LogoutAsync);
+
         endpoints.MapPost("forgotPassword", ForgotPasswordAsync);
 
         endpoints.MapPost("resetPassword", ResetPasswordAsync);
@@ -19,15 +21,21 @@ public static class AuthEndpoints
     }
 
     public static async Task<IResult> LoginAsync(
-        [FromBody] LoginRequest request, 
+        [FromBody] LoginRequest request,
         IAuthService authService,
         HttpContext context)
     {
         var result = await authService.LoginAsync(request);
 
-        if(result.Success && result.Data?.RefreshToken != null)
+        if (result.Success && result.Data?.RefreshToken != null)
         {
-            context.Response.Cookies.Append("RefreshToken", result.Data.RefreshToken);
+            context.Response.Cookies.Append("RefreshToken", result.Data.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = context.Request.IsHttps,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
             result.Data.RefreshToken = null;
         }
 
@@ -37,7 +45,7 @@ public static class AuthEndpoints
     }
 
     public static async Task<IResult> SignupAsync(
-        [FromBody] SignupRequest request, 
+        [FromBody] SignupRequest request,
         IAuthService authService)
     {
         var result = await authService.SignupAsync(request);
@@ -45,6 +53,21 @@ public static class AuthEndpoints
         return result.Success
                 ? Results.Ok(result)
                 : Results.BadRequest(result);
+    }
+
+    public static IResult LogoutAsync(
+       IAuthService authService,
+       HttpContext context)
+    {
+        context.Response.Cookies.Delete("RefreshToken", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = context.Request.IsHttps,
+            SameSite = SameSiteMode.None,
+            Expires = DateTimeOffset.UtcNow.AddDays(7)
+        });
+
+        return Results.Ok(new { Success = true, Message = "Logged out successfully." });
     }
 
     public static async Task<IResult> ForgotPasswordAsync(
@@ -70,20 +93,18 @@ public static class AuthEndpoints
     }
 
     public static async Task<IResult> RefreshTokenAsync(
-        [FromBody] string refreshToken,
         IAuthService authService,
         HttpContext context)
     {
-        var result = await authService.RefreshTokenAsync(refreshToken);
-
-        if (result.Success && result.Data?.RefreshToken != null)
+        if (!context.Request.Cookies.TryGetValue("RefreshToken", out var refreshToken) || string.IsNullOrEmpty(refreshToken))
         {
-            context.Response.Cookies.Append("RefreshToken", result.Data.RefreshToken);
-            result.Data.RefreshToken = null;
+            return Results.Unauthorized();
         }
 
+        var result = await authService.RefreshTokenAsync(refreshToken);
+
         return result.Success
-                ? Results.Ok(result)
-                : Results.BadRequest(result);
+                ? Results.Ok(result.Data)
+                : Results.Unauthorized();
     }
 }

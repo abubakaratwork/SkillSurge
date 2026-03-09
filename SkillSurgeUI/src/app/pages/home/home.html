@@ -25,11 +25,11 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        @for(product of products; track products){
+        @for(product of products || []; track products){
         <tr>
           <td class="px-4 py-2 text-nowrap">{{ product.name }}</td>
           <td class="px-4 py-2 text-nowrap">{{ product.description }}</td>
-          <td class="px-4 py-2 text-nowrap">{{ product.category?.name || 'Not selected' }}
+          <td class="px-4 py-2 text-nowrap">{{ product.categoryName || 'Not selected' }}
             @if(product.subCategory?.name){
             / {{ product.subCategory?.name}}
             }

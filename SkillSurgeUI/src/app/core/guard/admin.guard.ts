@@ -1,19 +1,26 @@
 import { inject } from "@angular/core";
 import { CanActivateFn, Router } from "@angular/router";
-import { LocalAuthService } from "../services/localauth.service";
 import { RoleTypes } from "../models/interfaces/User";
-import { map } from "rxjs";
+import { map, of, switchMap } from "rxjs";
+import { UserService } from "../services/user.service";
 
 export const adminGuard: CanActivateFn = (route, state) => {
-    let authService = inject(LocalAuthService);
-    let router = inject(Router);
+    const userService = inject(UserService);
+    const router = inject(Router);
 
-    return authService.user$.pipe(
-        map(user => {
-            if (user?.role === RoleTypes.admin) {
-                return true;
+    return userService.userProfile$.pipe(
+        switchMap(user => {
+            if (!user) {
+                return userService.loadUserProfile().pipe(
+                    map(u => (u?.role.toLowerCase() === RoleTypes.admin.toString())
+                        ? true
+                        : router.createUrlTree(['/home']))
+                );
             }
-            return router.createUrlTree(['/home']);
+
+            return of(user.role.toLowerCase() === RoleTypes.admin.toString()
+                ? true
+                : router.createUrlTree(['/home']));
         })
     );
-}
+};

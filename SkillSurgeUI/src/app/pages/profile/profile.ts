@@ -11,6 +11,9 @@ import { ChangePasswordDialog } from '../../shared/change-password-dialog/change
 import { ResponseType } from '../../core/models/responses/ResponseType';
 import { ResultService } from '../../core/services/result.service';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/services/auth.service';
+import { UserProfile, UserService } from '../../core/services/user.service';
+import { UpdatePasswordRequest, UpdateUserProfileRequest } from '../../core/models/requests/UserRequests';
 
 @Component({
   selector: 'app-profile',
@@ -19,21 +22,19 @@ import { ToastService } from '../../core/services/toast.service';
   styleUrl: './profile.css',
 })
 export class Profile {
-  user: User = {
+  user: UserProfile = {
     id: '',
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
-    agreeTerms: false,
-    role: RoleTypes.user
+    role: ''
   };
 
 
-  constructor(private authService: LocalAuthService, private router: Router, private dialog: MatDialog, private toastr: ToastService) {
-    effect(() => {
-      this.authService.user$.subscribe((u) => this.user = u!);
-    });
+  constructor(private userService: UserService, private router: Router, private dialog: MatDialog, private toastr: ToastService) { }
+
+  ngOnInit() {
+    this.userService.userProfile$.subscribe((u) => this.user = u!);
   }
 
   editInfo() {
@@ -41,12 +42,20 @@ export class Profile {
 
     dialogRef.afterClosed().subscribe((data: User | null) => {
       if (data) {
-        const res = this.authService.updateUserInfo(data);
-        if (res.isSuccess) {
-          this.toastr.success(res.message);
-        } else {
-          this.toastr.error(res.message);
+        const updateRequest: UpdateUserProfileRequest = {
+          firstName: data.firstName,
+          lastName: data.lastName
         }
+        this.userService.updateUserInfo(updateRequest).subscribe({
+          next: res => {
+            if (res.success) {
+              this.toastr.success(res.message);
+            }
+          },
+          error: err => {
+            this.toastr.error(err.error?.message)
+          }
+        });
       }
     })
   }
@@ -56,12 +65,20 @@ export class Profile {
 
     dialogRef.afterClosed().subscribe((data: { currentPassword: string, newPassword: string }) => {
       if (data) {
-        const res = this.authService.changePassword(data.currentPassword, data.newPassword);
-        if (res.isSuccess) {
-          this.toastr.success(res.message);
-        } else {
-          this.toastr.error(res.message);
+        const updateRequest: UpdatePasswordRequest = {
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword
         }
+        this.userService.changePassword(updateRequest).subscribe({
+          next: res => {
+            if (res.success) {
+              this.toastr.success(res.message);
+            }
+          },
+          error: err => {
+            this.toastr.error(err.error?.message);
+          }
+        });
       }
     })
   }

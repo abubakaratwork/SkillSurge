@@ -1,26 +1,25 @@
 import { Component, Inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NgSelectComponent } from '@ng-select/ng-select';
+import { NgSelectComponent, NgSelectModule } from '@ng-select/ng-select';
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { Product } from '../../core/models/interfaces/Product';
 import { UtilityService } from '../../core/services/utility.service';
-import { LocalAuthService } from '../../core/services/localauth.service';
 import { Category } from '../../core/models/interfaces/Category';
-import { LocalCategoryService } from '../../core/services/localcategory.service';
-import { MatIcon } from "@angular/material/icon";
 import { Currency } from '../../core/models/interfaces/Currency';
 import { LocalCurrencyService } from '../../core/services/localcurrency.service';
-import { LocalSubCategoryService } from '../../core/services/localsubcategory.service';
 import { SubCategory } from '../../core/models/interfaces/SubCategory';
+import { UserService } from '../../core/services/user.service';
+import { CategoryService } from '../../core/services/category.service';
+import { ProductService } from '../../core/services/product.service';
 
 @Component({
   selector: 'app-product-dialog',
   imports: [
     FormsModule,
-    NgSelectComponent
+    NgSelectModule
   ],
   templateUrl: './product-dialog.html',
-  styleUrl: './product-dialog.css',
+  styleUrls: ['./product-dialog.css'],
 })
 export class ProductDialog {
 
@@ -34,12 +33,12 @@ export class ProductDialog {
     private dialogRef: MatDialogRef<ProductDialog>,
     @Inject(MAT_DIALOG_DATA) private dialogData: any,
     private utility: UtilityService,
-    private authService: LocalAuthService,
-    private categoryService: LocalCategoryService,
-    private subCategoryService: LocalSubCategoryService,
+    private userService: UserService,
+    private categoryService: CategoryService,
+    private productService: ProductService,
     private currencyService: LocalCurrencyService
   ) {
-    this.authService.user$.subscribe((u) => this.userId = u?.id!);
+    this.userService.userProfile$.subscribe((u) => this.userId = u?.id!);
   }
 
   categories: Category[] = [];
@@ -71,19 +70,36 @@ export class ProductDialog {
 
   dialogAction: string = '';
 
-  ngOnInit() {
+  ngOnChanges() { console.log('2 OnChanges'); }
+  // ngOnInit() { console.log('3 OnInit'); }
+  ngAfterViewInit() { console.log('4 AfterViewInit'); }
+  ngOnDestroy() { console.log('5 OnDestroy'); }
+  ngOnRender() { console.log('5 onrender'); }
+
+
+  ngOnInit(): void {
+    console.log('3 OnInit');
     if (this.dialogData) {
-      this.product = this.dialogData?.formData ?? this.product;
-      if (this.product.categoryId != null && this.product.categoryId != '')
-        this.selectedCategory = this.product.categoryId;
-      this.categories = this.categoryService.getAll().data ?? this.categories;
+      if (this.dialogData.productId) {
+        const id = this.dialogData.productId;
+        this.productService.getById(id).subscribe((data) => {
+          this.product = { ...data.data, categoryId: data.data.parentCategoryId, subCategoryId: data.data.categoryId };
+
+          if (this.product.categoryId && this.product.subCategoryId) {
+            this.selectedCategory = this.product.categoryId;
+            this.categoryService.getSubCategories(this.selectedCategory).subscribe(data => {
+              this.subCategories = data.data ?? this.subCategories;
+              this.selectedSubCategory = this.product.subCategoryId;
+              this.subCategoryRequired = true;
+            });
+          }
+        });
+      }
+      this.categoryService.getAll().subscribe(data => {
+        this.categories = data.data.filter((d: Category) => d.subCategoriesCount != undefined && d.subCategoriesCount > 0) ?? this.categories
+      });
       this.dialogAction = this.dialogData?.action;
       this.currencies = this.currencyService.getAll();
-
-      if (this.product.categoryId) {
-        this.selectedCategory = this.product.categoryId;
-        this.onCategoryChange(this.selectedCategory);
-      }
     }
   }
 
@@ -98,7 +114,7 @@ export class ProductDialog {
     product.id = this.dialogAction == 'create' ? this.utility.generateId() : product.id;
     product.createdAt = this.dialogAction == 'create' ? new Date() : product.createdAt;
     product.categoryId = this.selectedCategory!;
-    if(this.selectedSubCategory) product.subCategoryId = this.selectedSubCategory;
+    product.subCategoryId = this.selectedSubCategory!;
     product.updatedAt = new Date();
     if (this.dialogAction == 'create') product.userId = this.userId;
     this.dialogRef.close(this.product)
@@ -139,23 +155,11 @@ export class ProductDialog {
     );
   }
 
-  onCategoryChange(categoryId: string | null) {
-    if (!categoryId) {
-      this.subCategories = [];
+  onCategoryChange(categoryId: string) {
+    this.categoryService.getSubCategories(categoryId).subscribe(data => {
+      this.subCategories = data.data ?? this.subCategories;
       this.selectedSubCategory = null;
-      this.subCategoryRequired = false; // no subcategories => not required
-      return;
-    }
-
-    const result = this.subCategoryService.getByCurrencyId(categoryId);
-    if (result.isSuccess && result.data.length > 0) {
-      this.subCategories = result.data;
-      this.selectedSubCategory = null;
-      this.subCategoryRequired = true; // subcategories exist => required
-    } else {
-      this.subCategories = [];
-      this.selectedSubCategory = null;
-      this.subCategoryRequired = false; // no subcategories => not required
-    }
+      this.subCategoryRequired = true;
+    });
   }
 }

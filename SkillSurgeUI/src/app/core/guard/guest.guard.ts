@@ -1,15 +1,19 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { LocalAuthService } from '../services/localauth.service';
+import { map } from 'rxjs';
+import { UserService } from '../services/user.service';
 
 export const guestGuard: CanActivateFn = (route, state) => {
-
-  const authService = inject(LocalAuthService);
+  const userService = inject(UserService);
   const router = inject(Router);
 
-  if (!authService.isLoggedIn()) {
-    return true;
-  }
+  return userService.userProfile$.pipe(
+    map(user => {
+      // if user is not logged in, allow access
+      if (!user) return true;
 
-  return router.createUrlTree(['/home']);
+      // if logged in, redirect to home
+      return router.createUrlTree(['/home']);
+    })
+  );
 };

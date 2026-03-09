@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Domain.Entities;
 
 namespace API.Endpoints;
 
@@ -25,8 +26,10 @@ public static class ProductEndpoints
 
     public static async Task<IResult> CreateProductAsync(
         [FromBody] CreateProductRequest request,
-        IProductService productService)
+        IProductService productService,
+        ClaimsPrincipal user)
     {
+        request.UserId = user.GetUserId();
         var result = await productService.CreateProductAsync(request);
 
         return result.Success
@@ -37,8 +40,10 @@ public static class ProductEndpoints
     public static async Task<IResult> UpdateProductAsync(
         Guid id,
         [FromBody] UpdateProductRequest request,
-        IProductService productService)
+        IProductService productService,
+        ClaimsPrincipal user)
     {
+        request.UserId = user.GetUserId();
         var result = await productService.UpdateProductAsync(id, request);
 
         return result.Success

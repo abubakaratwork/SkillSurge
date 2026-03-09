@@ -33,8 +33,8 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
     children: [
       { path: 'dashboard', loadComponent: () => import('./pages/admin-dashboard/admin-dashboard').then(c => c.AdminDashboard) },
-      { path: 'categories', loadComponent: () => import('./pages/categories/categories').then(p => p.Categories), canActivate: [adminGuard] },
-      { path: 'sub-categories', loadComponent: () => import('./pages/sub-categories/sub-categories').then(p => p.SubCategories) },
+      { path: 'categories', loadComponent: () => import('./pages/categories/categories').then(p => p.Categories) },
+      { path: 'users', loadComponent: () => import('./pages/users/users').then(p => p.Users) },
     ],
   },
   { path: '**', redirectTo: 'home' },

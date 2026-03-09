@@ -36,7 +36,7 @@
             Category <span class="text-red-500">*</span>
           </label>
 
-          <ng-select [items]="categories" bindLabel="name" bindValue="id" [(ngModel)]="selectedCategory" name="category"
+          <ng-select [items]="categories || []" bindLabel="name" bindValue="id" [(ngModel)]="selectedCategory" name="category"
             #category="ngModel" required placeholder="Select category" class="h-10 w-full text-sm"
             (ngModelChange)="onCategoryChange($event)">
 
@@ -74,8 +74,8 @@
             }
           </div>
 
-          <ng-select [items]="subCategories" bindLabel="name" bindValue="id" [(ngModel)]="selectedSubCategory"
-            name="subCategory" #subCategory="ngModel" [disabled]="!selectedCategory || subCategories.length === 0"
+          <ng-select [items]="subCategories || []" bindLabel="name" bindValue="id" [(ngModel)]="selectedSubCategory"
+            name="subCategory" #subCategory="ngModel" required [disabled]="!selectedCategory || subCategories.length === 0"
             [required]="subCategoryRequired" placeholder="Select sub category" class="h-10 w-full text-sm">
 
           </ng-select>
@@ -104,7 +104,7 @@
               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition no-spinner">
 
             <!-- Currency Select -->
-            <ng-select [items]="currencies" bindLabel="currencyCode" bindValue="currencyCode"
+            <ng-select [items]="currencies || []" bindLabel="currencyCode" bindValue="currencyCode"
               [(ngModel)]="product.currency" name="currency" placeholder="Currency" [searchable]="true"
               [clearable]="false" [searchFn]="currencySearchFn" class="h-10 w-40 text-sm">
 

@@ -17,13 +17,16 @@ public static class UserEndpoints
 
         endpoints.MapPost("/change-password", ChangePasswordAsync);
 
-        endpoints.MapGet("/", GetAllUsersAsync);
+        endpoints.MapGet("/", GetAllUsersAsync)
+                 .RequireAuthorization("Admin");
 
         endpoints.MapGet("/{id:guid}", GetUserByIdAsync);
 
-        endpoints.MapPatch("/{id:guid}/role", UpdateUserRoleAsync);
+        endpoints.MapPatch("/{id:guid}/role", UpdateUserRoleAsync)
+                 .RequireAuthorization("Admin");
 
-        endpoints.MapPatch("/{id:guid}/status", UpdateUserStatusAsync);
+        endpoints.MapPatch("/{id:guid}/status", UpdateUserStatusAsync)
+                 .RequireAuthorization("Admin");
     }
 
     public static async Task<IResult> GetProfileAsync(

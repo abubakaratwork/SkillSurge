@@ -5,10 +5,12 @@ public class SignupRequestValidator: AbstractValidator<SignupRequest>
     public SignupRequestValidator()
     {
         RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("First name is required.");
+            .NotEmpty().WithMessage("First name is required.")
+            .MinimumLength(2).WithMessage("First name should have minimum 2 characters.");
 
         RuleFor(x => x.LastName)
-            .NotEmpty().WithMessage("Last name is required.");
+            .NotEmpty().WithMessage("Last name is required.")
+            .MinimumLength(2).WithMessage("First name should have minimum 2 characters.");
 
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")

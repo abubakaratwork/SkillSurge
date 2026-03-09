@@ -1,4 +1,6 @@
-﻿namespace Services.Services;
+﻿using Domain.Models.DTOs;
+
+namespace Services.Services;
 
 public class UserService(
     IUserRepository userRepository,
@@ -29,20 +31,20 @@ public class UserService(
         return Result<bool>.SuccessResult(true, "Password updated successfully.");
     }
 
-    public async Task<Result<List<User>>> GetAllUsersAsync()
+    public async Task<Result<List<UserDetails>>> GetAllUsersAsync()
     {
         var users = await userRepository.GetAllAsync(1, 100);
         return users.Any()
-            ? Result<List<User>>.SuccessResult(users.ToList(), "All users fetched successfully.")
-            : Result<List<User>>.FailureResult("No users found");
+            ? Result<List<UserDetails>>.SuccessResult(users.ToList(), "All users fetched successfully.")
+            : Result<List<UserDetails>>.FailureResult("No users found");
     }
 
-    public async Task<Result<User>> GetProfileAsync(Guid userId)
+    public async Task<Result<UserProfile>> GetProfileAsync(Guid userId)
     {
-        var user = await userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetProfileByIdAsync(userId);
         return user != null
-            ? Result<User>.SuccessResult(user, "Profile fetched successfully.")
-            : Result<User>.FailureResult("Profile not found");
+            ? Result<UserProfile>.SuccessResult(user, "Profile fetched successfully.")
+            : Result<UserProfile>.FailureResult("Profile not found");
     }
 
     public async Task<Result<User>> GetUserByIdAsync(Guid id)

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Models.DTOs;
 
 namespace Services.Abstractions.Services;
 
@@ -9,5 +10,5 @@ public interface IProductService
     Task<Result<bool>> DeleteProductAsync(Guid id, Guid userId);
     Task<Result<List<Product>>> GetAllProductsAsync();
     Task<Result<Product>> GetProductByIdAsync(Guid id);
-    Task<Result<List<Product>>> GetMyProductsAsync(Guid userId);
+    Task<Result<List<ProductDetails>>> GetMyProductsAsync(Guid userId);
 }

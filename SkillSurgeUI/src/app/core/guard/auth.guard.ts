@@ -1,14 +1,18 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { LocalAuthService } from '../services/localauth.service';
+import { map, of, switchMap } from 'rxjs';
+import { UserService } from '../services/user.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
-  const authService = inject(LocalAuthService);
+  const userService = inject(UserService);
   const router = inject(Router);
 
-  if (authService.isLoggedIn()) {
-    return true;
-  }
-
-  return router.createUrlTree(['/login']);
+   return userService.userProfile$.pipe(
+    switchMap(profile => {
+      if (profile) return of(true);
+      return userService.loadUserProfile().pipe(
+        map(p => p ? true : router.createUrlTree(['/login']))
+      );
+    }),
+  );
 };

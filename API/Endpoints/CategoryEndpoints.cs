@@ -8,18 +8,26 @@ public static class CategoryEndpoints
     public static void MapCategoryEndpoints(this IEndpointRouteBuilder builder)
     {
         var endpoints = builder.MapGroup("categories")
-                               .WithTags("Categories")
-                               .RequireAuthorization("Admin");
+                               .WithTags("Categories");
 
-        endpoints.MapPost("/", CreateCategoryAsync);
-        endpoints.MapPut("/{id:guid}", UpdateCategoryAsync);
-        endpoints.MapDelete("/{id:guid}", DeleteCategoryAsync);
+        endpoints.MapPost("/", CreateCategoryAsync)
+                 .RequireAuthorization("Admin");
 
-        endpoints.MapGet("/", GetAllCategoriesAsync);
-        endpoints.MapGet("/{id:guid}", GetCategoryByIdAsync);
+        endpoints.MapPut("/{id:guid}", UpdateCategoryAsync)
+                 .RequireAuthorization("Admin");
 
+        endpoints.MapDelete("/{id:guid}", DeleteCategoryAsync)
+                 .RequireAuthorization("Admin");
+
+        endpoints.MapGet("/", GetAllCategoriesAsync)
+                 .RequireAuthorization();
+
+        endpoints.MapGet("/{id:guid}", GetCategoryByIdAsync)
+                 .RequireAuthorization();
+
+        endpoints.MapGet("/{id:guid}/subcategories", GetSubCategoriesAsync)
+                 .RequireAuthorization();
         //endpoints.MapGet("/tree", GetCategoryTreeAsync);
-        endpoints.MapGet("/{id:guid}/subcategories", GetSubCategoriesAsync);
     }
 
     public static async Task<IResult> CreateCategoryAsync(

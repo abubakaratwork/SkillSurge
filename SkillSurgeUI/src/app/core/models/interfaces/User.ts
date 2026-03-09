@@ -5,7 +5,10 @@ export interface User {
     email: string,
     password: string,
     agreeTerms: boolean,
-    role: RoleTypes
+    role: RoleTypes,
+    lastLoginAt: Date,
+    createdAt: Date,
+    updatedAt: Date,
 }
 
 export enum RoleTypes {

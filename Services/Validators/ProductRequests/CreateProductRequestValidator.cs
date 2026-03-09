@@ -13,9 +13,10 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
             .GreaterThan(0).WithMessage("Price must be greater than zero.");
         RuleFor(x => x.StockQuantity)
             .GreaterThanOrEqualTo(0).WithMessage("Stock quantity cannot be negative.");
+        RuleFor(x => x.Currency)
+            .NotEmpty().WithMessage("Currency is required.")
+            .Matches("^[A-Z]{3}$").WithMessage("Currency must be a 3-letter uppercase code.");
         RuleFor(x => x.CategoryId)
             .NotEmpty().WithMessage("Category ID is required.");
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
     }
 }

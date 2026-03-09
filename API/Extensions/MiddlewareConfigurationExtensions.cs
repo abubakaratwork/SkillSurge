@@ -14,6 +14,7 @@ public static class MiddlewareConfigurationExtensions
 
         app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseHttpsRedirection();
+        app.UseCors("DefaultCors");
         app.UseAuthentication();
         app.UseAuthorization();
     }

@@ -52,3 +52,33 @@ body {
 .toast-error .mat-mdc-snack-bar-action {
   color: white !important;
 }
+
+/* Target ng-select wrapper */
+.ng-select-custom {
+  width: 100%;
+  font-size: 0.875rem; /* text-sm */
+}
+
+/* Inner input inside ng-select */
+.ng-select-custom .ng-select-container {
+  min-height: 2.5rem; /* matches h-10 */
+  padding: 0.5rem 0.75rem; /* adjust padding like Tailwind */
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid #d1d5db; /* gray-300 */
+}
+
+/* Placeholder text */
+.ng-select-custom .ng-placeholder {
+  color: #9ca3af; /* Tailwind gray-400 */
+}
+
+/* Selected item text */
+.ng-select-custom .ng-value {
+  font-size: 0.875rem;
+}
+
+/* Dropdown panel */
+.ng-select-custom .ng-dropdown-panel {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}

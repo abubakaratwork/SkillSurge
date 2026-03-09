@@ -113,10 +113,7 @@ public class AuthService(
 
         var response = new RefreshTokenResponse
         {
-            AccessToken = newAccessToken,
-            ExpiresInMinutes = 10,
-            RefreshToken = refreshToken,
-            Username = $"{user.FirstName} {user.LastName}",
+            AccessToken = newAccessToken
         };
 
         return Result<RefreshTokenResponse>.SuccessResult(response, "");

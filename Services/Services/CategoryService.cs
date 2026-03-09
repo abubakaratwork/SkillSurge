@@ -23,6 +23,7 @@ public class CategoryService(
             Id = Guid.NewGuid(),
             Name = request.Name.Trim(),
             Description = request.Description,
+            IsActive = request.IsActive,
             ParentCategoryId = request.ParentCategoryId,
             IsDeleted = false,
             CreatedBy = request.UserId,
@@ -37,9 +38,7 @@ public class CategoryService(
     {
         var categories = await categoryRepository.GetRootCategoriesAsync();
 
-        return categories.Any()
-            ? Result<List<CategoryDetails>>.SuccessResult(categories.ToList(), "Categories fetched successfully.")
-            : Result<List<CategoryDetails>>.FailureResult("No categories found");
+        return Result<List<CategoryDetails>>.SuccessResult(categories.ToList(), "Categories fetched successfully.");
     }
 
     public async Task<Result<Category>> GetCategoryByIdAsync(Guid id)
@@ -54,7 +53,7 @@ public class CategoryService(
     //public async Task<Result<bool>> GetCategoryTreeAsync()
     //{
     //    var roots = await categoryRepository.GetRootCategoriesAsync();
-    //    var result = new List<Category>();
+    //    var result = new List<SubCategoryDetails>();
 
     //    foreach (var root in roots)
     //    {
@@ -93,8 +92,13 @@ public class CategoryService(
         if (category == null)
             return Result<bool>.FailureResult("Category not found");
 
+        var existingWithName = await categoryRepository.GetByNameAsync(request.Name.Trim());
+        if (existingWithName != null && existingWithName.Id != category.Id)
+            return Result<bool>.FailureResult("Category name already exists");
+
         category.Name = request.Name.Trim();
         category.Description = request.Description;
+        category.IsActive = request.IsActive;
         category.ParentCategoryId = request.ParentCategoryId;
         category.UpdatedBy = request.UserId;
         category.UpdatedAt = DateTime.UtcNow;

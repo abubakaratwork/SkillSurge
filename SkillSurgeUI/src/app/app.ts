@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { AuthService } from './core/services/auth.service';
+import { RouterOutlet } from '@angular/router';
+import { UserService } from './core/services/user.service';
 
 @Component({
   selector: 'app-root',
@@ -12,5 +12,7 @@ import { AuthService } from './core/services/auth.service';
 export class App {
   isAuthenticated = true;
 
-  constructor(private authService : AuthService) {}
+  constructor(private userService: UserService) {
+    this.userService.loadUserProfile();
+  }
 }

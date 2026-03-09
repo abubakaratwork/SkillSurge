@@ -26,15 +26,19 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
 
         var sql = """
             
-            SELECT 
-              Id,
-              Name,
-              Description,
-              CreatedAt,
-              UpdatedAt
-            FROM Categories
-            WHERE ParentCategoryId IS NULL
-              AND IsDeleted = 0
+              SELECT 
+              c.Id,
+              c.Name,
+              c.Description,
+              c.IsActive,
+              c.CreatedAt,
+              UpdatedAt,
+              (
+                Select COUNT(id) from Categories 
+                WHERE ParentCategoryId = c.Id) AS SubCategoriesCount
+                FROM Categories c
+                WHERE ParentCategoryId IS NULL
+              AND IsDeleted = 0 ORDER BY CreatedAt DESC
             
             """;
 
@@ -51,6 +55,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
                 s.Id,
                 s.Name,
                 s.Description,
+                s.IsActive,
                 s.ParentCategoryId,
                 s.CreatedAt,
                 s.UpdatedAt,
@@ -110,6 +115,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
                 Id,
                 Name,
                 Description,
+                IsActive,
                 ParentCategoryId,
                 IsDeleted,
                 CreatedBy,
@@ -120,6 +126,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
                 @Id,
                 @Name,
                 @Description,
+                @IsActive,
                 @ParentCategoryId,
                 @IsDeleted,
                 @CreatedBy,
@@ -141,6 +148,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             SET
                 Name = @Name,
                 Description = @Description,
+                IsActive = @IsActive,
                 ParentCategoryId = @ParentCategoryId,
                 UpdatedBy = @UpdatedBy,
                 UpdatedAt = @UpdatedAt

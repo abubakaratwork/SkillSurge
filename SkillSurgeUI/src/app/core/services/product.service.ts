@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { BaseApiService } from "./base-api.service";
+import { CreateProductRequest, UpdateProductRequest } from "../models/requests/ProductRequests";
 
 @Injectable({
   providedIn: 'root'
@@ -9,17 +10,17 @@ import { BaseApiService } from "./base-api.service";
 export class ProductService {
   baseUrl: string = '';
   constructor(private client: HttpClient, private config: BaseApiService) {
-    this.baseUrl = `${this.config.baseApiUrl}/api/product`;
+    this.baseUrl = `${this.config.baseApiUrl}/products`;
   }
 
-  createProduct(data: any): Observable<any> {
-    return this.client.post(`${this.baseUrl}/create`, data, {
+  createProduct(data: CreateProductRequest): Observable<any> {
+    return this.client.post(`${this.baseUrl}`, data, {
       withCredentials: true
     });
   }
 
   getAll(): Observable<any> {
-    return this.client.get(`${this.baseUrl}/getall`, {
+    return this.client.get(`${this.baseUrl}/my`, {
       withCredentials: true
     });
   }
@@ -30,8 +31,8 @@ export class ProductService {
     });
   }
 
-  updateProduct(data: any): Observable<any> {
-    return this.client.put(`${this.baseUrl}/${data?.id}`, data, {
+  updateProduct(id: string, data: UpdateProductRequest): Observable<any> {
+    return this.client.put(`${this.baseUrl}/${id}`, data, {
       withCredentials: true
     });
   }

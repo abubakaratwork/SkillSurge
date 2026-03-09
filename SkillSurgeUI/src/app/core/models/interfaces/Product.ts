@@ -13,6 +13,7 @@ export interface Product {
     createdAt: Date;
     updatedAt?: Date;
     categoryId: string;
+    categoryName?: string;
     category?: Category;
     subCategoryId: string;
     subCategory?: SubCategory;

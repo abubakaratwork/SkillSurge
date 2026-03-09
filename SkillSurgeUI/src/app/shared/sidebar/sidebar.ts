@@ -2,9 +2,10 @@ import { Component, effect, Input } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import { MatIcon } from "@angular/material/icon";
 import { NgClass, TitleCasePipe } from '@angular/common';
-import { LocalAuthService } from '../../core/services/localauth.service';
-import { RoleTypes, User } from '../../core/models/interfaces/User';
+import { User } from '../../core/models/interfaces/User';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -21,26 +22,26 @@ export class Sidebar {
   userName: string = 'User name';
   email: string = 'user email';
 
-  constructor(private authService: LocalAuthService, private router: Router, private toastr: ToastService) {
+  constructor(private authService: AuthService, private userService: UserService, private router: Router, private toastr: ToastService) {
     effect(() => {
-      this.authService.user$.subscribe((u) => {
+      this.userService.userProfile$.subscribe((u) => {
         this.userName = `${u?.firstName} ${u?.lastName}`
         this.email = u?.email!;
       });
     })
   }
 
-  ngOnInit() {
-    // if (this.authService.user()?.role == RoleTypes.admin) {
-    //   this.navItems.push({ label: 'Categories', link: '/categories', icon: 'category' })
-    // }
-    // this.navItems.push({ label: 'Profile', link: '/profile', icon: 'person' })
-  }
-
-
   logout() {
-    const res = this.authService.logout();
-    this.router.navigate(['/login']);
-    this.toastr.success(res.message);
+    this.userService.logout().subscribe({
+      next: (res) => {
+        this.router.navigate(['/login']);
+        this.toastr.success(res.message || 'Logged out successfully.');
+      },
+      error: (error) => {
+        this.userService.clearUserState();
+        this.router.navigate(['/login']);
+        this.toastr.error(error.error?.message || "Something went wrong. Please try again.");
+      }
+    });
   }
 }

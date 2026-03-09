@@ -1,4 +1,6 @@
-export interface LoginResponse { }
+export interface LoginResponse {
+    accessToken: string
+ }
 
 export interface SignupResponse { }
 
