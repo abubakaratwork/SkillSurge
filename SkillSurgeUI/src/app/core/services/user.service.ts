@@ -76,4 +76,16 @@ export class UserService {
     getAllUsers(){
         return this.client.get<TypedResponse<User[]>>(`${this.userUrl}`)
     }
+
+    updateUser(user: User){
+        return this.client.put<TypedResponse<User>>(`${this.userUrl}/${user.id}`, user)
+    }
+
+    deleteUser(id: string){
+        return this.client.delete<TypedResponse<boolean>>(`${this.userUrl}/${id}`)
+    }
+
+    getAllRoles(){
+        return this.client.get<TypedResponse<any>>(`${this.baseUrl}/roles`);
+    }
 };

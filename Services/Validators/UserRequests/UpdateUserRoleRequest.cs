@@ -4,9 +4,6 @@ public class UpdateUserRoleRequestValidator : AbstractValidator<UpdateUserRoleRe
 {
     public UpdateUserRoleRequestValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("UserId is required.");
-
         RuleFor(x => x.RoleId)
             .NotEmpty().WithMessage("RoleId is required.");
     }

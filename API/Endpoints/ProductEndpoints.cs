@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using Domain.Entities;
 
 namespace API.Endpoints;
 

@@ -8,5 +8,6 @@ public static class EndpointsConfigurationExtensions
         app.MapUserEndpoints();
         app.MapProductEndpoints();
         app.MapCategoryEndpoints();
+        app.MapRoleEndpoints();
     }
 }

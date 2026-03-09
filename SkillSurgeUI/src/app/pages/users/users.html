@@ -1,53 +1,71 @@
 <section class="mt-12 px-6">
+  <h2 class="text-2xl font-semibold mb-6 text-gray-800">Users</h2>
 
-    <h2 class="text-2xl font-semibold mb-6 text-gray-800">Users</h2>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+      <thead class="bg-gray-50">
+        <tr class="text-left text-gray-700">
+          <th class="px-4 py-2 font-semibold text-nowrap">Name</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Email</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Role</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Active</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Last Login</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Created At</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Updated At</th>
+          <th class="px-4 py-2 font-semibold text-nowrap">Actions</th>
+        </tr>
+      </thead>
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-            <thead class="bg-gray-50">
-                <tr class="text-left text-gray-700">
-                    <th class="px-4 py-2 font-semibold text-nowrap">Name</th>
-                    <th class="px-4 py-2 font-semibold text-nowrap">Email</th>
-                    <th class="px-4 py-2 font-semibold text-nowrap">Role</th>
-                    <th class="px-4 py-2 font-semibold text-nowrap">Active</th>
-                    <th class="px-4 py-2 font-semibold text-nowrap">Last Login</th>
-                    <th class="px-4 py-2 font-semibold text-nowrap">Created At</th>
-                    <th class="px-4 py-2 font-semibold text-nowrap">Updated At</th>
-                    <th class="px-4 py-2 font-semibold text-nowrap">Actions</th>
-                </tr>
-            </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        @for (user of users; track users) {
+          <tr>
+            <td class="px-4 py-2 text-nowrap">{{ user.firstName }} {{ user.lastName }}</td>
+            <td class="px-4 py-2 text-nowrap">{{ user.email }}</td>
+            <td class="px-4 py-2 text-nowrap">{{ user.role || 'N/A' }}</td>
+            <td class="px-4 py-2 text-nowrap">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="sr-only peer"
+                  [checked]="user.isActive"
+                  (change)="updateStatus(user)"
+                />
 
-            <tbody class="bg-white divide-y divide-gray-200">
-                @for(user of users; track users){
-                <tr>
-                    <td class="px-4 py-2 text-nowrap">{{ user.firstName }} {{ user.lastName }}</td>
-                    <td class="px-4 py-2 text-nowrap">{{ user.email }}</td>
-                    <td class="px-4 py-2 text-nowrap">{{ user.role || 'N/A' }}</td>
-                    <td class="px-4 py-2 text-nowrap" [class]="user.isActive ? 'text-green-500' : 'text-red-500'">
-                        <mat-icon>{{ user.isActive ? 'check' : 'close' }}</mat-icon>
-                    </td>
-                    <td class="px-4 py-2 text-nowrap">{{ user.lastLoginAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
-                    <td class="px-4 py-2 text-nowrap">{{ user.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
-                    <td class="px-4 py-2 text-nowrap">{{ user.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
-                    <td class="px-4 py-2 flex gap-2">
-                        <button (click)="editUser(user.id)"
-                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg flex items-center justify-center">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button (click)="deleteUser(user.id)"
-                            class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg flex items-center justify-center">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </td>
-                </tr>
-                }
-                @empty {
-                <tr>
-                    <td colspan="9" class="text-center py-6 text-gray-500">No Users Found</td>
-                </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
+                <div
+                  class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-green-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+                ></div>
+              </label>
+            </td>
+            <td class="px-4 py-2 text-nowrap">
+              {{ user.lastLoginAt | date: 'dd-MMM-yyyy hh:mm a' }}
+            </td>
+            <td class="px-4 py-2 text-nowrap">
+              {{ user.createdAt | date: 'dd-MMM-yyyy hh:mm a' }}
+            </td>
+            <td class="px-4 py-2 text-nowrap">
+              {{ user.updatedAt | date: 'dd-MMM-yyyy hh:mm a' }}
+            </td>
+            <td class="px-4 py-2 flex gap-2">
+              <button
+                (click)="editUser(user.id)"
+                class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg flex items-center justify-center"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                (click)="deleteUser(user.id)"
+                class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg flex items-center justify-center"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="9" class="text-center py-6 text-gray-500">No Users Found</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 </section>
