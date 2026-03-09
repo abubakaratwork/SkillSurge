@@ -1,4 +1,6 @@
-﻿namespace API.Extensions;
+﻿using API.Middlewares;
+
+namespace API.Extensions;
 
 public static class MiddlewareConfigurationExtensions
 {
@@ -10,6 +12,9 @@ public static class MiddlewareConfigurationExtensions
             app.UseSwaggerUI();
         }
 
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseHttpsRedirection();
+        app.UseAuthentication();
+        app.UseAuthorization();
     }
 }

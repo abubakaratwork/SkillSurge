@@ -1,6 +1,4 @@
-﻿using API.Endpoints;
-
-namespace API.Extensions;
+﻿namespace API.Extensions;
 
 public static class EndpointsConfigurationExtensions
 {
@@ -9,5 +7,6 @@ public static class EndpointsConfigurationExtensions
         app.MapAuthEndpoints();
         app.MapUserEndpoints();
         app.MapProductEndpoints();
+        app.MapCategoryEndpoints();
     }
 }
