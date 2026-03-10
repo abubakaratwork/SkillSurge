@@ -77,8 +77,12 @@ export class UserService {
         return this.client.get<TypedResponse<User[]>>(`${this.userUrl}`)
     }
 
-    updateUser(user: User){
-        return this.client.put<TypedResponse<User>>(`${this.userUrl}/${user.id}`, user)
+    updateUserRole(id: string, payload: any){
+        return this.client.patch<TypedResponse<User>>(`${this.userUrl}/${id}/role`, payload)
+    }
+
+    updateUserStatus(id: string, payload: any){
+        return this.client.patch<TypedResponse<User>>(`${this.userUrl}/${id}/status`, payload)
     }
 
     deleteUser(id: string){

@@ -88,8 +88,12 @@ public static class UserEndpoints
     public static async Task<IResult> UpdateUserRoleAsync(
         Guid id,
         [FromBody] UpdateUserRoleRequest request,
-        IUserService userService)
+        IUserService userService,
+        ClaimsPrincipal user)
     {
+        if (id == user.GetUserId())
+            return Results.Forbid();
+
         var result = await userService.UpdateUserRoleAsync(id, request);
 
         return result.Success
@@ -100,8 +104,12 @@ public static class UserEndpoints
     public static async Task<IResult> UpdateUserStatusAsync(
         Guid id,
         [FromBody] UpdateUserStatusRequest request,
-        IUserService userService)
+        IUserService userService,
+        ClaimsPrincipal user)
     {
+        if (id == user.GetUserId())
+            return Results.Forbid();
+
         var result = await userService.UpdateUserStatusAsync(id, request);
 
         return result.Success

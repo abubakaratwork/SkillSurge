@@ -6,6 +6,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { UserDialogComponent } from '../../shared/user-dialog/user-dialog.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-users',
@@ -19,6 +20,7 @@ export class Users {
   constructor(
     private userService: UserService,
     private dialog: MatDialog,
+    private toastr: ToastService
   ) {}
 
   ngOnInit() {
@@ -34,7 +36,7 @@ export class Users {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.userService.updateUser(result).subscribe(() => {
+        this.userService.updateUserRole(result.id, { roleId: result.role }).subscribe(() => {
           this.ngOnInit();
         });
       }
@@ -50,6 +52,21 @@ export class Users {
   }
 
   updateStatus(user: any){
-    console.log(user);
+    this.userService.updateUserStatus(user.id, { isActive: !user.isActive}).subscribe({
+      next: () => {
+        this.ngOnInit();
+        this.toastr.success('User status updated successfully');
+      },
+      error: (err) => {
+        if(err.status === 403){
+          this.toastr.error('You do not have permission to update user status');
+          this.ngOnInit();
+        }
+        else{
+          this.toastr.error('Failed to update user status');
+        }
+        this.ngOnInit();
+      }
+    });
   }
 }
