@@ -19,6 +19,9 @@ public static class CategoryEndpoints
         endpoints.MapDelete("/{id:guid}", DeleteCategoryAsync)
                  .RequireAuthorization("Admin");
 
+        endpoints.MapPut("/{id:guid}/restore", RestoreCategoryAsync)
+                 .RequireAuthorization("Admin");
+
         endpoints.MapGet("/", GetAllCategoriesAsync)
                  .RequireAuthorization();
 
@@ -27,7 +30,11 @@ public static class CategoryEndpoints
 
         endpoints.MapGet("/{id:guid}/subcategories", GetSubCategoriesAsync)
                  .RequireAuthorization();
+
+        endpoints.MapGet("/{id:guid}/subcategories/deleted", GetDeletedSubCategoriesAsync)
+                 .RequireAuthorization();
         //endpoints.MapGet("/tree", GetCategoryTreeAsync);
+
     }
 
     public static async Task<IResult> CreateCategoryAsync(
@@ -63,6 +70,18 @@ public static class CategoryEndpoints
         ClaimsPrincipal user)
     {
         var result = await categoryService.DeleteCategoryAsync(id, user.GetUserId());
+
+        return result.Success
+                ? Results.Ok(result)
+                : Results.BadRequest(result);
+    }
+    public static async Task<IResult> RestoreCategoryAsync(
+        Guid id,
+        [FromQuery] bool restoreAll,
+        ICategoryService categoryService,
+        ClaimsPrincipal user)
+    {
+        var result = await categoryService.RestoreCategoryAsync(id, restoreAll, user.GetUserId());
 
         return result.Success
                 ? Results.Ok(result)
@@ -105,6 +124,17 @@ public static class CategoryEndpoints
         ICategoryService categoryService)
     {
         var result = await categoryService.GetSubCategoriesAsync(id);
+
+        return result.Success
+                ? Results.Ok(result)
+                : Results.BadRequest(result);
+    }
+
+    public static async Task<IResult> GetDeletedSubCategoriesAsync(
+        Guid id,
+        ICategoryService categoryService)
+    {
+        var result = await categoryService.GetDeletedSubCategoriesAsync(id);
 
         return result.Success
                 ? Results.Ok(result)

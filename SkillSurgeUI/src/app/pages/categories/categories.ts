@@ -7,7 +7,6 @@ import { LocalAuthService } from '../../core/services/localauth.service';
 import { CategoryDialog } from '../../shared/category-dialog/category-dialog';
 import { MatIcon } from "@angular/material/icon";
 import { DatePipe } from '@angular/common';
-import { ResultService } from '../../core/services/result.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CreateCategoryRequest, UpdateCategoryRequest } from '../../core/models/requests/CategoryRequests';
@@ -34,6 +33,8 @@ export class Categories {
 
   userId: string = '';
   categories: Category[] = [];
+  activeCategories: Category[] = [];
+  deletedCategories: Category[] = [];
   category: Category | null = null;
 
   repetitiveStyles = {
@@ -45,15 +46,11 @@ export class Categories {
 
   ngOnInit() {
     this.categoryService.getAll().subscribe((data) => {
-      this.categories = data.data ?? []
+      this.categories = data.data ?? [];
+      this.activeCategories = this.categories.filter(c => !c.isDeleted);
+      this.deletedCategories = this.categories.filter(c => c.isDeleted || c.deletedSubCategoriesCount! > 0 );
     });
     this.category = this.defaultCategory();
-  }
-
-  refetch() {
-    this.categoryService.getAll().subscribe((data) => {
-      this.categories = data.data ?? []
-    });
   }
 
   openModal(event: 'create' | 'update' = 'create', parentId?: string) {
@@ -66,7 +63,6 @@ export class Categories {
         if (event === 'create') {
           const payload: CreateCategoryRequest = {
             name: data?.name,
-            isActive: data?.isActive,
             description: data.description,
           }
           if (data.parentCategoryId) payload.parentCategoryId = data.parentCategoryId
@@ -74,15 +70,14 @@ export class Categories {
             next: (res) => {
               console.log(res);
               if (res.success) {
+                this.ngOnInit();
                 this.toastr.success(res.message)
-                this.refetch();
               }
             }
           })
         } else {
           const payload: UpdateCategoryRequest = {
             name: data?.name,
-            isActive: data?.isActive,
             description: data.description
           }
           if (data.parentCategoryId) payload.parentCategoryId = data.parentCategoryId
@@ -90,8 +85,8 @@ export class Categories {
             next: (res) => {
               console.log(res);
               if (res.success) {
+                this.ngOnInit();
                 this.toastr.success(res.message)
-                this.refetch();
               }
             }
           })
@@ -123,7 +118,16 @@ export class Categories {
   deleteCategoryById(id: string) {
     this.categoryService.deleteCategory(id).subscribe((data) => {
       if (data && data.success) {
-        this.refetch();
+        this.ngOnInit();
+        this.toastr.success(data.message);
+      }
+    });
+  }
+
+  restoreCategoryById(id: string, restoreAll: boolean = false) {
+    this.categoryService.restoreCategory(id, restoreAll).subscribe((data) => {
+      if (data && data.success) {
+        this.ngOnInit();
         this.toastr.success(data.message);
       }
     });
@@ -132,25 +136,49 @@ export class Categories {
   toggleSubCategories(category: Category) {
 
     // collapse
-    if (category.isExpanded) {
-      category.isExpanded = false;
+    if (category.isActiveExpanded) {
+      category.isActiveExpanded = false;
       return;
     }
 
     // already loaded
-    if (category.subCategories?.length) {
-      category.isExpanded = true;
+    if (category.activeSubCategories?.length) {
+      category.isActiveExpanded = true;
       return;
     }
 
     // load from API
     this.categoryService.getSubCategories(category.id).subscribe(res => {
 
-      category.subCategories = res.data;
-      category.isExpanded = true;
+      if(res.success && res.data){
+        category.activeSubCategories = res.data.filter(s => !s.isDeleted);
+        category.isActiveExpanded = true;
+      }
 
     });
+  }
+  
+  toggleDeletedSubCategories(category: Category) {
 
+    // collapse
+    if (category.isDeletedExpanded) {
+      category.isDeletedExpanded = false;
+      return;
+    }
+
+    // already loaded
+    if (category.deletedSubCategories?.length) {
+      category.isDeletedExpanded = true;
+      return;
+    }
+
+    // load from API
+    this.categoryService.getDeletedSubCategories(category.id).subscribe(res => {
+
+      category.deletedSubCategories = res.data;
+      category.isDeletedExpanded = true;
+
+    });
   }
 
   viewCategory(id: string) {
@@ -163,7 +191,7 @@ export class Categories {
       name: '',
       description: '',
       parentCategoryId: '',
-      isActive: true,
+      isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -171,6 +199,11 @@ export class Categories {
 
   formatId(id: string) {
     return id.replace(/\D/g, '').slice(0, 8);
+  }
+  
+  isActiveTab=true;
+  toggleTabs(check: boolean){
+    this.isActiveTab = check;
   }
 }
 

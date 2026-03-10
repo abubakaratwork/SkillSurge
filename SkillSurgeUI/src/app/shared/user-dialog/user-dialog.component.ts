@@ -15,7 +15,7 @@ export class UserDialogComponent {
 
   user: User;
 
-  roles = [];
+  roles : {name: string, id: string, level: number}[]= [];
 
   constructor(
     private dialogRef: MatDialogRef<UserDialogComponent>,
@@ -28,6 +28,8 @@ export class UserDialogComponent {
   ngOnInit(){
      this.userService.getAllRoles().subscribe((data) => {
       this.roles = data.data!;
+      this.roles = this.roles.filter(r => r.name.toLowerCase() != 'superadmin')
+      this.user.role = this.roles.find(r => r.name = this.user.role)?.id ?? this.user.role;
     });
   }
 

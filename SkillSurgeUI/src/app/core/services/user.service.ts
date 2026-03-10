@@ -92,4 +92,8 @@ export class UserService {
     getAllRoles(){
         return this.client.get<TypedResponse<any>>(`${this.baseUrl}/roles`);
     }
+
+    getAdminDashboard(){
+        return this.client.get<TypedResponse<any>>(this.baseUrl+'/admin/dashboard')
+    }
 };

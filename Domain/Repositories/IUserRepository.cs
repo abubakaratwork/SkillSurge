@@ -16,4 +16,5 @@ public interface IUserRepository
     Task ActivateAsync(Guid userId);
     Task DeactivateAsync(Guid userId);
     Task DeleteAsync(Guid userId);
+    Task<DashboardDetails> GetDashboardDetailsAsync();
 }

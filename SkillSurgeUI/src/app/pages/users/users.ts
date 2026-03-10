@@ -21,7 +21,7 @@ export class Users {
     private userService: UserService,
     private dialog: MatDialog,
     private toastr: ToastService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.userService.getAllUsers().subscribe((data) => {
@@ -36,9 +36,19 @@ export class Users {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.userService.updateUserRole(result.id, { roleId: result.role }).subscribe(() => {
-          this.ngOnInit();
-        });
+        this.userService.updateUserRole(result.id, { roleId: result.role }).subscribe(
+          {
+            next: res => {
+              if (res.success) {
+                this.ngOnInit();
+                this.toastr.success(res.message)
+              }
+              this.toastr.error(res.message)
+            },
+            error: err => {
+              this.toastr.error(err.error?.message)
+            }
+          });
       }
     });
   }
@@ -51,19 +61,19 @@ export class Users {
     }
   }
 
-  updateStatus(user: any){
-    this.userService.updateUserStatus(user.id, { isActive: !user.isActive}).subscribe({
-      next: () => {
+  updateStatus(user: any) {
+    this.userService.updateUserStatus(user.id, { isActive: !user.isActive }).subscribe({
+      next: (res) => {
         this.ngOnInit();
-        this.toastr.success('User status updated successfully');
+        this.toastr.success(res.message);
       },
       error: (err) => {
-        if(err.status === 403){
-          this.toastr.error('You do not have permission to update user status');
+        if (err.status === 403) {
+          this.toastr.success('You do not have permission to update user status');
           this.ngOnInit();
         }
-        else{
-          this.toastr.error('Failed to update user status');
+        else {
+          this.toastr.error(err.error?.message || 'Failed to update user status');
         }
         this.ngOnInit();
       }

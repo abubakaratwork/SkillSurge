@@ -42,7 +42,7 @@ export class ProductDialog {
   }
 
   categories: Category[] = [];
-  subCategories: SubCategory[] = [];
+  subCategories: Category[] = [];
 
   selectedCategory: string | null = null;
   selectedSubCategory: string | null = null;
@@ -78,26 +78,29 @@ export class ProductDialog {
 
 
   ngOnInit(): void {
-    console.log('3 OnInit');
+    console.log('3 OnInit', this.dialogData);
     if (this.dialogData) {
       if (this.dialogData.productId) {
         const id = this.dialogData.productId;
         this.productService.getById(id).subscribe((data) => {
           this.product = { ...data.data, categoryId: data.data.parentCategoryId, subCategoryId: data.data.categoryId };
 
+          console.log(this.product)
           if (this.product.categoryId && this.product.subCategoryId) {
             this.selectedCategory = this.product.categoryId;
+            this.selectedSubCategory = this.product.subCategoryId;
             this.categoryService.getSubCategories(this.selectedCategory).subscribe(data => {
-              this.subCategories = data.data ?? this.subCategories;
-              this.selectedSubCategory = this.product.subCategoryId;
+              this.subCategories = data.data!.filter(s =>
+                !s.isDeleted || s.id === this.selectedSubCategory
+              );
               this.subCategoryRequired = true;
             });
+            this.fetchCategories();
           }
         });
+      } else {
+        this.fetchCategories();
       }
-      this.categoryService.getAll().subscribe(data => {
-        this.categories = data.data.filter((d: Category) => d.subCategoriesCount != undefined && d.subCategoriesCount > 0) ?? this.categories
-      });
       this.dialogAction = this.dialogData?.action;
       this.currencies = this.currencyService.getAll();
     }
@@ -157,9 +160,21 @@ export class ProductDialog {
 
   onCategoryChange(categoryId: string) {
     this.categoryService.getSubCategories(categoryId).subscribe(data => {
-      this.subCategories = data.data ?? this.subCategories;
+      this.subCategories = data.data!.filter(s =>
+        !s.isDeleted || s.id === this.product.subCategoryId
+      );
       this.selectedSubCategory = null;
       this.subCategoryRequired = true;
+    });
+  }
+
+  fetchCategories() {
+    this.categoryService.getAll().subscribe(data => {
+      console.log(data.data, this.selectedCategory)
+      this.categories = data.data.filter((c: Category) =>
+        (!c.isDeleted && (c.activeSubCategoriesCount ?? 0) > 0) ||
+        c.id === this.selectedCategory
+      );
     });
   }
 }

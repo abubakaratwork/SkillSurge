@@ -1,4 +1,5 @@
-﻿using Domain.Models.DTOs;
+﻿using Domain.Entities;
+using Domain.Models.DTOs;
 
 namespace Persistence.Repositories;
 
@@ -235,5 +236,26 @@ public class UserRepository(DbConnectionFactory factory) : IUserRepository
         """;
 
         await connection.ExecuteAsync(sql, new { UserId = userId });
+    }
+
+    public async Task<DashboardDetails> GetDashboardDetailsAsync()
+    {
+        using var connection = factory.CreateConnection();
+
+        var sql = """
+        
+        SELECT
+            (SELECT COUNT(*) FROM Users) AS UsersCount,
+            (SELECT COUNT(*) FROM Products WHERE IsDeleted = 0) AS ProductsCount,
+            (SELECT COUNT(*) FROM Categories WHERE IsDeleted = 0 AND ParentCategoryId IS NULL) AS CategoriesCount,
+            (SELECT COUNT(*) 
+             FROM Categories 
+             WHERE ParentCategoryId IS NOT NULL 
+               AND IsDeleted = 0) AS SubCategoriesCount
+        
+        """
+        ;
+
+        return await connection.QuerySingleAsync<DashboardDetails>(sql);
     }
 }

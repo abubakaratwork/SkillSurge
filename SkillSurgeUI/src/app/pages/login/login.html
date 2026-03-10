@@ -38,7 +38,7 @@
       </div>
 
       <!-- Submit Button -->
-      <app-button title="Login" type="submit" [disabled]="!formData.valid"></app-button>
+      <app-button title="Login" type="submit" [disabled]="!formData.valid || isLoading"></app-button>
 
     </form>
 

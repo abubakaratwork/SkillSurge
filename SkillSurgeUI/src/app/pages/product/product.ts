@@ -4,6 +4,8 @@ import { LocalProductService } from '../../core/services/localproduct.service';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../core/models/interfaces/Product';
 import { SpacedPricePipe } from '../../core/pipes/spaced-price-pipe';
+import { ProductService } from '../../core/services/product.service';
+import { CategoryService } from '../../core/services/category.service';
 
 @Component({
   selector: 'app-product',
@@ -12,7 +14,12 @@ import { SpacedPricePipe } from '../../core/pipes/spaced-price-pipe';
   styleUrl: './product.css',
 })
 export class ProductComponent {
-  constructor(private route: ActivatedRoute, private localProdService: LocalProductService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private localProdService: LocalProductService,
+    private prodService: ProductService,
+    private categoryService: CategoryService
+  ) { }
 
   product: Product = {
     id: '0000000-0000-0000-0000-0000000000000',
@@ -31,7 +38,19 @@ export class ProductComponent {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    this.product = this.localProdService.getById(id ?? "").data ?? this.product;
+    if (id) {
+      this.prodService.getById(id).subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.product = res.data;
+
+            this.categoryService.getById(this.product.categoryId).subscribe(res => this.product.categoryName = res.data.name)
+          } else {
+
+          }
+        }
+      })
+    }
   }
 
   getCategoryName(category: string | undefined, subCategory: string | undefined) {

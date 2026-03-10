@@ -31,6 +31,12 @@ public class UserService(
         return Result<bool>.SuccessResult(true, "Password updated successfully.");
     }
 
+    public async Task<Result<DashboardDetails>> GetAdminDashboardAsync()
+    {
+        var result = await userRepository.GetDashboardDetailsAsync();
+        return Result<DashboardDetails>.SuccessResult(result, "Dashboard data fetched");
+    }
+
     public async Task<Result<List<UserDetails>>> GetAllUsersAsync()
     {
         var users = await userRepository.GetAllAsync(1, 100);
@@ -84,9 +90,12 @@ public class UserService(
         if (user == null)
             return Result<bool>.FailureResult("User not found");
 
-        var role = await roleRepository.GetByIdAsync(request.RoleId);
+        var role = await roleRepository.GetByIdAsync(user.RoleId);
         if (role == null)
             return Result<bool>.FailureResult("Role not found");
+
+        if(role.Name.ToLower() == "admin")
+            return Result<bool>.FailureResult("Your are forbid to update this user's role.");
 
         await userRepository.UpdateRoleAsync(id, request.RoleId);
         return Result<bool>.SuccessResult(true, "User's role updated successfully.");
@@ -101,6 +110,13 @@ public class UserService(
         var user = await userRepository.GetByIdAsync(id);
         if (user == null)
             return Result<bool>.FailureResult("User not found");
+
+        var role = await roleRepository.GetByIdAsync(user.RoleId);
+        if (role == null)
+            return Result<bool>.FailureResult("Role not found");
+
+        if (role.Name.ToLower() == "admin")
+            return Result<bool>.FailureResult("Your are forbid to update this user's status.");
 
         if (request.IsActive)
             await userRepository.ActivateAsync(id);

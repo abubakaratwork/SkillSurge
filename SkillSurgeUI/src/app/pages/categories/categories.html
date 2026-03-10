@@ -1,7 +1,9 @@
 <section class="mt-12 px-6">
 
     <!-- Button to open Category modal -->
-    <div class="flex justify-end items-center mb-6">
+    <div class="flex justify-between items-center mb-5">
+
+        <h2 class="text-2xl font-semibold text-gray-800">Categories</h2>
 
         <button (click)="addCategory()"
             class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg">
@@ -10,7 +12,26 @@
 
     </div>
 
-    <!-- Categories table -->
+    <!-- Button to open Category modal -->
+    <div class="flex justify-start items-center gap-2 mb-5">
+
+        <button (click)="toggleTabs(true)"
+            class="text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
+            [class]="isActiveTab ? 'bg-primary hover:bg-primary-hover': 'bg-gray-700'">
+            Active
+        </button>
+
+        <button (click)="toggleTabs(false)"
+            class="text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
+            [class]="!isActiveTab ? 'bg-primary hover:bg-primary-hover': 'bg-gray-700'">
+            Inactive
+        </button>
+
+    </div>
+
+    @if(isActiveTab){
+
+    <!-- Active Categories table -->
     <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
 
         <table class="min-w-full">
@@ -19,7 +40,7 @@
                 <tr class="text-left text-gray-700 text-sm">
                     <th class="px-5 py-3 font-semibold text-nowrap">Name</th>
                     <th class="px-5 py-3 font-semibold text-nowrap">Description</th>
-                    <th class="px-5 py-3 font-semibold text-nowrap">Active</th>
+                    <!-- <th class="px-5 py-3 font-semibold text-nowrap">Active</th> -->
                     <th class="px-5 py-3 font-semibold text-nowrap">Created At</th>
                     <th class="px-5 py-3 font-semibold text-nowrap">Updated At</th>
                     <th class="px-5 py-3 font-semibold text-nowrap">Actions</th>
@@ -28,147 +49,145 @@
 
             <tbody class="divide-y divide-gray-100 text-sm">
 
-                @if (categories?.length) {
+                @if (activeCategories?.length) {
 
-                    @for (category of categories; track category.id) {
+                @for (category of activeCategories; track category.id) {
 
-                        <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="hover:bg-gray-50 transition-colors">
 
-                            <td class="px-5 py-3 text-nowrap flex items-end gap-2">
+                    <td class="px-5 py-3 text-nowrap flex items-end gap-2">
 
-                                <div class="w-7 flex justify-center items-center">
+                        <div class="w-7 flex justify-center items-center">
 
-                                    @if(!category.parentCategoryId &&
-                                    category.subCategoriesCount &&
-                                    category.subCategoriesCount > 0){
+                            @if(!category.parentCategoryId &&
+                            category.activeSubCategoriesCount &&
+                            category.activeSubCategoriesCount > 0){
 
-                                        <button (click)="toggleSubCategories(category)"
-                                            class="flex items-center justify-center rounded-md hover:bg-gray-200 transition">
+                            <button (click)="toggleSubCategories(category)"
+                                class="flex items-center justify-center rounded-md hover:bg-gray-200 transition">
 
-                                            <mat-icon class="text-gray-600">
-                                                {{ category.isExpanded ? 'remove' : 'add' }}
-                                            </mat-icon>
-
-                                        </button>
-
-                                    }
-
-                                </div>
-
-                                <span class="font-medium text-gray-800">
-                                    {{ category.name }}
-                                </span>
-
-                            </td>
-
-                            <td class="px-5 py-3 text-gray-600 text-nowrap">
-                                {{ category.description || '-' }}
-                            </td>
-
-                            <td class="px-5 py-3 text-nowrap"
-                                [class]="category.isActive ? 'text-green-500' : 'text-red-500'">
-
-                                <mat-icon>
-                                    {{ category.isActive ? 'check' : 'close' }}
+                                <mat-icon class="text-gray-600">
+                                    {{ category.isActiveExpanded ? 'remove' : 'add' }}
                                 </mat-icon>
 
-                            </td>
-
-                            <td class="px-5 py-3 text-gray-600 text-nowrap">
-                                {{ category.createdAt | date:'dd-MMM-yyyy hh:mm a' }}
-                            </td>
-
-                            <td class="px-5 py-3 text-gray-600 text-nowrap">
-                                {{ category.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}
-                            </td>
-
-                            <td class="px-5 py-3 flex gap-2">
-
-                                <button (click)="editCategory(category.id, category.parentCategoryId)"
-                                    class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg">
-                                    <mat-icon>edit</mat-icon>
-                                </button>
-
-                                <button (click)="deleteCategoryById(category.id)"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-
-                                <button (click)="addSubCategory(category.id)"
-                                    class="bg-primary hover:bg-primary-hover text-white px-1.5 py-1 rounded-lg">
-                                    <mat-icon>add</mat-icon>
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                        @if (category.subCategories?.length && category.isExpanded) {
-
-                            @for (sub of category.subCategories; track sub.id) {
-
-                                <tr class="bg-gray-50 hover:bg-gray-100 transition">
-
-                                    <td class="px-5 py-3 pl-12 flex items-center gap-2">
-
-                                        <span class="text-gray-400 text-sm">↳</span>
-
-                                        <span class="text-gray-700">
-                                            {{ sub.name }}
-                                        </span>
-
-                                    </td>
-
-                                    <td class="px-5 py-3 text-gray-600">
-                                        {{ sub.description || '-' }}
-                                    </td>
-
-                                    <td class="px-5 py-3"
-                                        [class]="sub.isActive ? 'text-green-500' : 'text-red-500'">
-
-                                        <mat-icon>
-                                            {{ sub.isActive ? 'check' : 'close' }}
-                                        </mat-icon>
-
-                                    </td>
-
-                                    <td class="px-5 py-3 text-gray-600">
-                                        {{ sub.createdAt | date:'dd-MMM-yyyy hh:mm a' }}
-                                    </td>
-
-                                    <td class="px-5 py-3 text-gray-600">
-                                        {{ sub.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}
-                                    </td>
-
-                                    <td class="px-5 py-3 flex gap-2">
-
-                                        <button (click)="editCategory(sub.id, sub.parentCategoryId)"
-                                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg">
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-
-                                        <button (click)="deleteCategoryById(sub.id)"
-                                            class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-
-                                    </td>
-
-                                </tr>
+                            </button>
 
                             }
 
-                        }
+                        </div>
 
-                    }
+                        <span class="font-medium text-gray-800">
+                            {{ category.name }}
+                        </span>
+
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600 text-nowrap">
+                        {{ category.description || '-' }}
+                    </td>
+
+                    <!-- <td class="px-5 py-3 text-nowrap" [class]="category.isActive ? 'text-green-500' : 'text-red-500'">
+
+                        <mat-icon>
+                            {{ category.isActive ? 'check' : 'close' }}
+                        </mat-icon>
+
+                    </td> -->
+
+                    <td class="px-5 py-3 text-gray-600 text-nowrap">
+                        {{ category.createdAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600 text-nowrap">
+                        {{ category.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 flex gap-2">
+
+                        <button (click)="editCategory(category.id, category.parentCategoryId)"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+
+                        <button (click)="deleteCategoryById(category.id)"
+                            class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+
+                        <button (click)="addSubCategory(category.id)"
+                            class="bg-primary hover:bg-primary-hover text-white px-1.5 py-1 rounded-lg">
+                            <mat-icon>add</mat-icon>
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                @if (category.activeSubCategories?.length && category.isActiveExpanded) {
+
+                @for (sub of category.activeSubCategories; track sub.id) {
+
+                <tr class="bg-gray-50 hover:bg-gray-100 transition">
+
+                    <td class="px-5 py-3 pl-12 flex items-center gap-2">
+
+                        <span class="text-gray-400 text-sm">↳</span>
+
+                        <span class="text-gray-700">
+                            {{ sub.name }}
+                        </span>
+
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600">
+                        {{ sub.description || '-' }}
+                    </td>
+
+                    <!-- <td class="px-5 py-3" [class]="sub.isActive ? 'text-green-500' : 'text-red-500'">
+
+                        <mat-icon>
+                            {{ sub.isActive ? 'check' : 'close' }}
+                        </mat-icon>
+
+                    </td> -->
+
+                    <td class="px-5 py-3 text-gray-600">
+                        {{ sub.createdAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600">
+                        {{ sub.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 flex gap-2">
+
+                        <button (click)="editCategory(sub.id, sub.parentCategoryId)"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+
+                        <button (click)="deleteCategoryById(sub.id)"
+                            class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                }
+
+                }
+
+                }
 
                 } @else {
 
-                    <tr>
-                        <td colspan="6" class="text-center py-8 text-gray-400">
-                            No Category Found
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="6" class="text-center py-8 text-gray-400">
+                        No Category Found
+                    </td>
+                </tr>
 
                 }
 
@@ -177,5 +196,167 @@
         </table>
 
     </div>
+    }
+    @else if (!isActiveTab) {
+    <!-- InActive Categories table -->
+    <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
 
+        <table class="min-w-full">
+
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr class="text-left text-gray-700 text-sm">
+                    <th class="px-5 py-3 font-semibold text-nowrap">Name</th>
+                    <th class="px-5 py-3 font-semibold text-nowrap">Description</th>
+                    <!-- <th class="px-5 py-3 font-semibold text-nowrap">Active</th> -->
+                    <th class="px-5 py-3 font-semibold text-nowrap">Created At</th>
+                    <th class="px-5 py-3 font-semibold text-nowrap">Updated At</th>
+                    <th class="px-5 py-3 font-semibold text-nowrap">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-100 text-sm">
+
+                @if (deletedCategories?.length) {
+
+                @for (category of deletedCategories; track category.id) {
+
+                <tr class="hover:bg-gray-50 transition-colors h-12">
+
+                    <td class="px-5 py-3 text-nowrap flex items-end gap-2">
+
+                        <div class="w-7 flex justify-center items-center">
+
+                            @if(!category.parentCategoryId &&
+                            category.deletedSubCategoriesCount &&
+                            category.deletedSubCategoriesCount > 0){
+
+                            <button (click)="toggleDeletedSubCategories(category)"
+                                class="flex items-center justify-center rounded-md hover:bg-gray-200 transition">
+
+                                <mat-icon class="text-gray-600">
+                                    {{ category.isDeletedExpanded ? 'remove' : 'add' }}
+                                </mat-icon>
+
+                            </button>
+
+                            }
+
+                        </div>
+
+                        <span class="font-medium text-gray-800">
+                            {{ category.name }}
+                        </span>
+
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600 text-nowrap">
+                        {{ category.description || '-' }}
+                    </td>
+
+                    <!-- <td class="px-5 py-3 text-nowrap" [class]="category.isActive ? 'text-green-500' : 'text-red-500'">
+
+                        <mat-icon>
+                            {{ category.isActive ? 'check' : 'close' }}
+                        </mat-icon>
+
+                    </td> -->
+
+                    <td class="px-5 py-3 text-gray-600 text-nowrap">
+                        {{ category.createdAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600 text-nowrap">
+                        {{ category.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 flex gap-2">
+                        @if(category.isDeleted){
+
+                        <!-- Restore single category -->
+                        <!-- <button (click)="restoreCategoryById(category.id)"
+                            class="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white px-2 py-2 rounded-lg transition-colors duration-200">
+                            <mat-icon>restore</mat-icon>
+                        </button> -->
+                        }
+
+                        <!-- Restore entire tree -->
+                        <button (click)="restoreCategoryById(category.id, true)"
+                            class="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white px-2 py-2 rounded-lg transition-colors duration-200">
+                            <mat-icon>restore</mat-icon>
+                        </button>
+                    </td>
+
+                </tr>
+
+                @if (category.deletedSubCategories?.length && category.isDeletedExpanded) {
+
+                @for (sub of category.deletedSubCategories; track sub.id) {
+
+                <tr class="bg-gray-50 hover:bg-gray-100 transition h-12">
+
+                    <td class="px-5 py-3 pl-12 flex items-center gap-2">
+
+                        <span class="text-gray-400 text-sm">↳</span>
+
+                        <span class="text-gray-700">
+                            {{ sub.name }}
+                        </span>
+
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600">
+                        {{ sub.description || '-' }}
+                    </td>
+
+                    <!-- <td class="px-5 py-3" [class]="sub.isActive ? 'text-green-500' : 'text-red-500'">
+
+                        <mat-icon>
+                            {{ sub.isActive ? 'check' : 'close' }}
+                        </mat-icon>
+
+                    </td> -->
+
+                    <td class="px-5 py-3 text-gray-600">
+                        {{ sub.createdAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 text-gray-600">
+                        {{ sub.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}
+                    </td>
+
+                    <td class="px-5 py-3 flex gap-2">
+                        @if(sub.isDeleted){
+
+                        <button (click)="restoreCategoryById(sub.id)"
+                            class="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white px-2 py-2 rounded-lg transition-colors duration-200">
+                            <mat-icon>restore</mat-icon>
+                        </button>
+
+                        }
+                    </td>
+
+                </tr>
+
+                }
+
+                }
+
+                }
+
+                } @else {
+
+                <tr>
+                    <td colspan="6" class="text-center py-8 text-gray-400">
+                        No Category Found
+                    </td>
+                </tr>
+
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+    }
 </section>

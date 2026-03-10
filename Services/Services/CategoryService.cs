@@ -1,4 +1,5 @@
-﻿using Domain.Models.DTOs;
+﻿using Domain.Entities;
+using Domain.Models.DTOs;
 
 namespace Services.Services;
 
@@ -77,9 +78,13 @@ public class CategoryService(
     public async Task<Result<List<SubCategoryDetails>>> GetSubCategoriesAsync(Guid parentCategoryId)
     {
         var children = await categoryRepository.GetChildrenAsync(parentCategoryId);
-        return children.Any()
-            ? Result<List<SubCategoryDetails>>.SuccessResult(children.ToList(), "")
-            : Result<List<SubCategoryDetails>>.FailureResult("No subcategories found");
+        return Result<List<SubCategoryDetails>>.SuccessResult(children.ToList(), "");
+    }
+
+    public async Task<Result<List<SubCategoryDetails>>> GetDeletedSubCategoriesAsync(Guid parentCategoryId)
+    {
+        var children = await categoryRepository.GetDeletedChildrenAsync(parentCategoryId);
+        return Result<List<SubCategoryDetails>>.SuccessResult(children.ToList(), "");
     }
 
     public async Task<Result<bool>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request)
@@ -113,7 +118,39 @@ public class CategoryService(
         if (category == null)
             return Result<bool>.FailureResult("Category not found");
 
-        await categoryRepository.SoftDeleteAsync(id, userId);
-        return Result<bool>.SuccessResult(true, "Category deleted successfully.");
+        var message = "";
+        if (category.ParentCategoryId != null)
+        {
+            await categoryRepository.SoftDeleteAsync(id, userId);
+            message = "Category deleted successfully.";
+        }
+        else
+        {
+            await categoryRepository.SoftDeleteCategoryTreeAsync(id, userId);
+            message = "Categories deleted successfully.";
+        }
+
+        return Result<bool>.SuccessResult(true, message);
+    }
+
+    public async Task<Result<bool>> RestoreCategoryAsync(Guid id, bool restoreAll, Guid userId)
+    {
+        var category = await categoryRepository.GetByIdAsync(id);
+        if (category == null)
+            return Result<bool>.FailureResult("Category not found");
+
+        var message = "";
+        if (!restoreAll || category.ParentCategoryId.HasValue)
+        {
+            await categoryRepository.RestoreAsync(id, userId);
+            message = "Category restored successfully.";
+        }
+        else if (restoreAll)
+        {
+            await categoryRepository.RestoreCategoryTreeAsync(id, userId);
+            message = "Categories restored successfully.";
+        }
+
+        return Result<bool>.SuccessResult(true, message);
     }
 }

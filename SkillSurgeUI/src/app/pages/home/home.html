@@ -1,7 +1,9 @@
 <section class="mt-12 px-6">
 
   <!-- Button to open modal -->
-  <div class="flex justify-end mb-4">
+  <div class="flex justify-between mb-5">
+    <h2 class="text-2xl font-semibold text-gray-800">Products</h2>
+
     <button (click)="openModal()"
       class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg">
       Add Product
@@ -9,49 +11,51 @@
   </div>
 
   <!-- Products table -->
-  <div class="overflow-x-auto">
-    <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-      <thead class="bg-gray-50">
+  <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+
+    <table class="min-w-full">
+
+      <thead class="bg-gray-50 border-b border-gray-200">
         <tr class="text-left text-gray-700">
-          <th class="px-4 py-2 font-semibold text-nowrap">Name</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Description</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Category</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Price</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Stock Quantity</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Active</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Created At</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Updated At</th>
-          <th class="px-4 py-2 font-semibold text-nowrap">Actions</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Name</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Description</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Category</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Price</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Stock Quantity</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Active</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Created At</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Updated At</th>
+          <th class="px-5 py-3 font-semibold text-nowrap">Actions</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         @for(product of products || []; track products){
         <tr>
-          <td class="px-4 py-2 text-nowrap">{{ product.name }}</td>
-          <td class="px-4 py-2 text-nowrap">{{ product.description }}</td>
-          <td class="px-4 py-2 text-nowrap">{{ product.categoryName || 'Not selected' }}
+          <td class="px-5 py-3 text-nowrap">{{ product.name }}</td>
+          <td class="px-5 py-3 text-nowrap">{{ product.description }}</td>
+          <td class="px-5 py-3 text-nowrap">{{ product.categoryName || 'Not selected' }}
             @if(product.subCategory?.name){
             / {{ product.subCategory?.name}}
             }
           </td>
-          <td class="px-4 py-2 text-nowrap">
+          <td class="px-5 py-3 text-nowrap">
             {{ product.price | spacedPrice:product.currency }}
           </td>
-          <td class="px-4 py-2 text-nowrap">{{ product.stockQuantity }}</td>
-          <td class="px-4 py-2 text-nowrap text-green-500"
+          <td class="px-5 py-3 text-nowrap">{{ product.stockQuantity }}</td>
+          <td class="px-5 py-3 text-nowrap text-green-500"
             [class]="product.isActive ? 'text-green-500' : 'text-red-500'">
             <mat-icon>
               {{ product.isActive ? 'check' : 'close' }}
             </mat-icon>
           </td>
-          <td class="px-4 py-2 text-nowrap">{{ product.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
-          <td class="px-4 py-2 text-nowrap">{{ product.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
-          <td class="px-4 py-2 flex gap-2">
+          <td class="px-5 py-3 text-nowrap">{{ product.createdAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+          <td class="px-5 py-3 text-nowrap">{{ product.updatedAt | date:'dd-MMM-yyyy hh:mm a' }}</td>
+          <td class="px-5 py-3 flex gap-2">
             <button (click)="edit(product.id)"
               class="bg-yellow-400 hover:bg-yellow-500 text-white px-1.5 py-1 rounded-lg transition-colors flex items-center justify-center">
               <mat-icon>edit</mat-icon>
             </button>
-            <button (click)="deleteProductById(product.id)"
+            <button (click)="deleteProductById(product.id)" [disabled]="isDeleting"
               class="bg-red-500 hover:bg-red-600 text-white px-1.5 py-1 rounded-lg transition-colors flex items-center justify-center">
               <mat-icon>delete</mat-icon>
             </button>

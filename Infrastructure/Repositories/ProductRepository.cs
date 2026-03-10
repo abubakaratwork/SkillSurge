@@ -46,13 +46,12 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
                 c.Id AS CategoryId,
                 pc.Id AS ParentCategoryId
             FROM Products p
-            JOIN Categories c
+            LEFT JOIN Categories c
                 ON p.CategoryId = c.Id
             LEFT JOIN Categories pc
                 ON c.ParentCategoryId = pc.Id
             WHERE p.Id = @Id
               AND p.IsDeleted = 0
-        
         """;
 
         return await connection.QueryFirstOrDefaultAsync<Product>(sql, new { Id = id });
@@ -94,7 +93,7 @@ public class ProductRepository(DbConnectionFactory factory) : IProductRepository
                 p.UpdatedAt,
                 c.Name AS CategoryName
             FROM Products p
-            JOIN Categories c
+            LEFT JOIN Categories c
             ON p.CategoryId = c.Id
             WHERE p.OwnerId = @OwnerId
               AND p.IsDeleted = 0

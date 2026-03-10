@@ -12,4 +12,5 @@ public interface IUserService
     Task<Result<User>> GetUserByIdAsync(Guid id);
     Task<Result<bool>> UpdateUserRoleAsync(Guid id, UpdateUserRoleRequest request);
     Task<Result<bool>> UpdateUserStatusAsync(Guid id, UpdateUserStatusRequest request);
+    Task<Result<DashboardDetails>> GetAdminDashboardAsync();
 }

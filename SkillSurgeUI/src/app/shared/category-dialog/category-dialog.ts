@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormArray, FormsModule, NgForm } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UtilityService } from '../../core/services/utility.service';
 import { LocalAuthService } from '../../core/services/localauth.service';
@@ -31,7 +31,7 @@ export class CategoryDialog {
     id: '',
     name: '',
     description: '',
-    isActive: true,
+    isDeleted: false,
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -76,7 +76,7 @@ export class CategoryDialog {
       name: '',
       description: '',
       parentCategoryId: '',
-      isActive: true,
+      isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date()
     };

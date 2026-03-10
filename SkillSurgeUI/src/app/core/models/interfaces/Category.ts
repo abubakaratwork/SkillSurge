@@ -2,11 +2,14 @@ export interface Category {
     id: string;
     name: string;
     description?: string;
-    isActive: boolean;
+    isDeleted: boolean;
     parentCategoryId?: string,
     createdAt?: Date;
     updatedAt?: Date;
-    subCategories?: Category[];
-    subCategoriesCount?: number;
-    isExpanded?: boolean;
+    activeSubCategories?: Category[];
+    deletedSubCategories?: Category[];
+    activeSubCategoriesCount?: number;
+    deletedSubCategoriesCount?: number;
+    isActiveExpanded?: boolean;
+    isDeletedExpanded?: boolean;
 }

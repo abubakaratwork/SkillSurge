@@ -12,5 +12,5 @@ public class ProductDetails
     public string CategoryName { get; set; } = default!;
     public string SubCategoryName { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }

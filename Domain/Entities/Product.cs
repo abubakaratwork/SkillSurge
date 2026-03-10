@@ -9,7 +9,7 @@ public class Product
     public int StockQuantity { get; set; }
     public bool IsActive { get; set; }
     public string Currency { get; set; } = default!;
-    public Guid CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
     public Guid? ParentCategoryId { get; set; }
     public Guid OwnerId { get; set; }
     public bool IsDeleted { get; set; }

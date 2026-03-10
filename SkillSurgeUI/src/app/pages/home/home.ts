@@ -13,6 +13,7 @@ import { SpacedPricePipe } from '../../core/pipes/spaced-price-pipe';
 import { ProductService } from '../../core/services/product.service';
 import { CreateProductRequest, UpdateProductRequest } from '../../core/models/requests/ProductRequests';
 import { UserService } from '../../core/services/user.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -30,6 +31,11 @@ export class Home {
     private toastr: ToastService
   ) { }
 
+  isCreating = false;
+  isUpdating = false;
+  isDeleting = false;
+  isFetching = false;
+
   userId: string = '';
 
   repetitiveStyles = {
@@ -43,8 +49,10 @@ export class Home {
   product: Product | null = null;
 
   ngOnInit() {
-    this.userService.userProfile$.subscribe((u) => this.userId = u?.id!);
-    // this.products = this.localProdService.getAllByUser().data ?? [];
+    this.isFetching = true;
+    this.userService.userProfile$.pipe(
+      finalize(() => this.isFetching = false)
+    ).subscribe((u) => this.userId = u?.id!);
     this.product = this.defaultProduct();
     this.prodService.getAll().subscribe((data) => {
       this.products = data.data ?? []
@@ -52,8 +60,10 @@ export class Home {
   }
 
   refetch() {
-    // this.products = this.localProdService.getAllByUser().data ?? [];
-    this.prodService.getAll().subscribe((data) => {
+    this.isFetching = true;
+    this.prodService.getAll().pipe(
+      finalize(() => this.isFetching = false)
+    ).subscribe((data) => {
       this.products = data.data ?? []
     });
   }
@@ -65,7 +75,6 @@ export class Home {
 
     dialogRef.afterClosed().subscribe((data: Product | undefined) => {
       if (data) {
-        // let res;
         if (event === 'create') {
           const payload: CreateProductRequest = {
             name: data?.name,
@@ -76,7 +85,10 @@ export class Home {
             isActive: data?.isActive,
             categoryId: data.subCategoryId
           }
-          this.prodService.createProduct(payload).subscribe({
+          this.isCreating = true;
+          this.prodService.createProduct(payload).pipe(
+            finalize(() => this.isCreating = false)
+          ).subscribe({
             next: (res) => {
               console.log(res);
               if (res.success) {
@@ -85,7 +97,6 @@ export class Home {
               }
             }
           })
-          // res = this.localProdService.create(data);
         } else {
           const payload: UpdateProductRequest = {
             name: data.name,
@@ -96,7 +107,10 @@ export class Home {
             isActive: data?.isActive,
             categoryId: data.subCategoryId
           }
-          this.prodService.updateProduct(data.id, payload).subscribe({
+          this.isUpdating = true;
+          this.prodService.updateProduct(data.id, payload).pipe(
+            finalize(() => this.isUpdating = false)
+          ).subscribe({
             next: (res) => {
               console.log(res);
               if (res.success) {
@@ -105,15 +119,7 @@ export class Home {
               }
             }
           })
-          // res = this.localProdService.update(data);
         }
-        // if (res && res.isSuccess) {
-        //   this.toastr.success(res.message);
-        //   this.refetch();
-        // }
-        // else {
-        //   this.toastr.error(res.message)
-        // }
       }
     })
   }

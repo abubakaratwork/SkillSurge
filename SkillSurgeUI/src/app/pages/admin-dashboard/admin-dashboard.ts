@@ -12,8 +12,18 @@ import { UserService } from '../../core/services/user.service';
 export class AdminDashboard {
   constructor(private userService: UserService) { }
 
-  totalUsers = 3;
-  totalProducts = 3;
-  totalCategories = 3;
-  totalSubCategories = 3;
+  totalUsers = 0;
+  totalProducts = 0;
+  totalCategories = 0;
+  totalSubCategories = 0;
+
+  ngOnInit(){
+    this.userService.getAdminDashboard().subscribe(res => {
+      const data = res.data;
+      this.totalCategories = data.categoriesCount
+      this.totalProducts = data.productsCount
+      this.totalUsers = data.usersCount
+      this.totalSubCategories = data.subCategoriesCount
+    })
+  }
 }

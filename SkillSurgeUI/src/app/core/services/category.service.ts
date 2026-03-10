@@ -3,6 +3,8 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { BaseApiService } from "./base-api.service";
 import { CreateCategoryRequest, UpdateCategoryRequest } from "../models/requests/CategoryRequests";
+import { TypedResponse } from "../models/responses/response.type";
+import { Category } from "../models/interfaces/Category";
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +27,14 @@ export class CategoryService {
     });
   }
 
-  getSubCategories(parentId: string): Observable<any> {
-    return this.client.get(`${this.baseUrl}/${parentId}/subcategories`, {
+  getSubCategories(parentId: string): Observable<TypedResponse<Category[]>> {
+    return this.client.get<TypedResponse<Category[]>>(`${this.baseUrl}/${parentId}/subcategories`, {
+      withCredentials: true
+    });
+  }
+
+  getDeletedSubCategories(parentId: string): Observable<any> {
+    return this.client.get(`${this.baseUrl}/${parentId}/subcategories/deleted`, {
       withCredentials: true
     });
   }
@@ -45,6 +53,12 @@ export class CategoryService {
 
   deleteCategory(id: string): Observable<any> {
     return this.client.delete(`${this.baseUrl}/${id}`, {
+      withCredentials: true
+    });
+  }
+
+  restoreCategory(id: string, restoreAll: boolean = false): Observable<any> {
+    return this.client.put(`${this.baseUrl}/${id}/restore?restoreAll=${restoreAll}`, {
       withCredentials: true
     });
   }

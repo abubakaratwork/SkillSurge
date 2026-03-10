@@ -12,4 +12,6 @@ public interface ICategoryService
     Task<Result<Category>> GetCategoryByIdAsync(Guid id);
     //Task<Result<bool>> GetCategoryTreeAsync();
     Task<Result<List<SubCategoryDetails>>> GetSubCategoriesAsync(Guid parentCategoryId);
+    Task<Result<List<SubCategoryDetails>>> GetDeletedSubCategoriesAsync(Guid parentCategoryId);
+    Task<Result<bool>> RestoreCategoryAsync(Guid id, bool restoreAll, Guid restoredBy);
 }

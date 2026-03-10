@@ -26,19 +26,28 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
 
         var sql = """
             
-              SELECT 
-              c.Id,
-              c.Name,
-              c.Description,
-              c.IsActive,
-              c.CreatedAt,
-              UpdatedAt,
-              (
-                Select COUNT(id) from Categories 
-                WHERE ParentCategoryId = c.Id) AS SubCategoriesCount
+             SELECT 
+                c.Id,
+                c.Name,
+                c.Description,
+                c.IsDeleted,
+                c.CreatedAt,
+                c.UpdatedAt,
+                (
+                    SELECT COUNT(Id)
+                    FROM Categories
+                    WHERE ParentCategoryId = c.Id
+                        AND IsDeleted = 0
+                ) AS ActiveSubCategoriesCount,
+                (
+                    SELECT COUNT(Id)
+                    FROM Categories
+                    WHERE ParentCategoryId = c.Id
+                        AND IsDeleted = 1
+                ) AS DeletedSubCategoriesCount
                 FROM Categories c
                 WHERE ParentCategoryId IS NULL
-              AND IsDeleted = 0 ORDER BY CreatedAt DESC
+                ORDER BY CreatedAt DESC;
             
             """;
 
@@ -55,7 +64,7 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
                 s.Id,
                 s.Name,
                 s.Description,
-                s.IsActive,
+                s.IsDeleted,
                 s.ParentCategoryId,
                 s.CreatedAt,
                 s.UpdatedAt,
@@ -64,7 +73,6 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             INNER JOIN Categories AS p
                 ON s.ParentCategoryId = p.Id
             WHERE s.ParentCategoryId = @ParentId
-              AND s.IsDeleted = 0
             
             """;
 
@@ -80,7 +88,6 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             SELECT *
             FROM Categories
             WHERE Id = @Id
-              AND IsDeleted = 0
             
             """;
 
@@ -96,7 +103,6 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             SELECT *
             FROM Categories
             WHERE Name = @Name
-              AND IsDeleted = 0
             
             """;
 
@@ -153,7 +159,6 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
                 UpdatedBy = @UpdatedBy,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id
-              AND IsDeleted = 0
             
             """;
 
@@ -165,15 +170,13 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
         using var connection = factory.CreateConnection();
 
         var sql = """
-            
             UPDATE Categories
             SET
                 IsDeleted = 1,
                 UpdatedBy = @DeletedBy,
-                UpdatedAt = @Now
+                UpdatedAt = SYSUTCDATETIME()
             WHERE Id = @Id
-            
-            """;
+        """;
 
         await connection.ExecuteAsync(sql, new
         {
@@ -181,5 +184,104 @@ public class CategoryRepository(DbConnectionFactory factory) : ICategoryReposito
             DeletedBy = deletedBy,
             Now = DateTime.UtcNow
         });
+    }
+
+    public async Task SoftDeleteCategoryTreeAsync(Guid id, Guid deletedBy)
+    {
+        using var connection = factory.CreateConnection();
+
+        var sql = """
+            WITH CategoryTree AS (
+                SELECT Id
+                FROM Categories
+                WHERE Id = @Id AND IsDeleted = 0
+
+                UNION ALL
+
+                SELECT c.Id
+                FROM Categories c
+                INNER JOIN CategoryTree ct ON c.ParentCategoryId = ct.Id
+                WHERE c.IsDeleted = 0
+            )
+            UPDATE Categories
+            SET 
+                IsDeleted = 1,
+                UpdatedBy = @DeletedBy,
+                UpdatedAt = SYSUTCDATETIME()
+            WHERE Id IN (SELECT Id FROM CategoryTree)
+        """;
+
+        await connection.ExecuteAsync(sql, new
+        {
+            Id = id,
+            DeletedBy = deletedBy
+        });
+    }
+
+    public async Task RestoreAsync(Guid id, Guid restoredBy)
+    {
+        using var connection = factory.CreateConnection();
+
+        var sql = """
+            UPDATE Categories
+            SET
+                IsDeleted = 0,
+                UpdatedBy = @RestoredBy,
+                UpdatedAt = SYSUTCDATETIME()
+            WHERE Id = @Id
+        """;
+
+        await connection.ExecuteAsync(sql, new
+        {
+            Id = id,
+            RestoredBy = restoredBy
+        });
+    }
+
+    public async Task RestoreCategoryTreeAsync(Guid id, Guid restoredBy)
+    {
+        using var connection = factory.CreateConnection();
+
+        var sql = """
+           
+            UPDATE Categories
+            SET 
+                IsDeleted = 0,
+                UpdatedBy = @RestoredBy,
+                UpdatedAt = SYSUTCDATETIME()
+            WHERE (Id = @Id OR ParentCategoryId = @Id) AND IsDeleted = 1
+
+        """;
+
+        await connection.ExecuteAsync(sql, new
+        {
+            Id = id,
+            RestoredBy = restoredBy
+        });
+    }
+
+    public async Task<IEnumerable<SubCategoryDetails>> GetDeletedChildrenAsync(Guid parentId)
+    {
+        using var connection = factory.CreateConnection();
+
+        var sql = $"""
+            
+            SELECT 
+                s.Id,
+                s.Name,
+                s.Description,
+                s.IsDeleted,
+                s.ParentCategoryId,
+                s.CreatedAt,
+                s.UpdatedAt,
+                p.Name AS ParentCategoryName
+            FROM Categories AS s
+            INNER JOIN Categories AS p
+                ON s.ParentCategoryId = p.Id
+            WHERE s.ParentCategoryId = @ParentId
+             AND s.IsDeleted = 1
+            """;
+
+        return await connection.QueryAsync<SubCategoryDetails>(sql, new { ParentId = parentId });
     }
 }

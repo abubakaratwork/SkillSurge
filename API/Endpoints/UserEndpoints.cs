@@ -27,6 +27,10 @@ public static class UserEndpoints
 
         endpoints.MapPatch("/{id:guid}/status", UpdateUserStatusAsync)
                  .RequireAuthorization("Admin");
+
+        builder.MapGet("admin/dashboard", GetDashboard)
+                .WithTags("Admin")
+                .RequireAuthorization("Admin");
     }
 
     public static async Task<IResult> GetProfileAsync(
@@ -91,8 +95,6 @@ public static class UserEndpoints
         IUserService userService,
         ClaimsPrincipal user)
     {
-        if (id == user.GetUserId())
-            return Results.Forbid();
 
         var result = await userService.UpdateUserRoleAsync(id, request);
 
@@ -111,6 +113,15 @@ public static class UserEndpoints
             return Results.Forbid();
 
         var result = await userService.UpdateUserStatusAsync(id, request);
+
+        return result.Success
+                ? Results.Ok(result)
+                : Results.BadRequest(result);
+    }
+    public static async Task<IResult> GetDashboard(
+        IUserService userService)
+    {
+        var result = await userService.GetAdminDashboardAsync();
 
         return result.Success
                 ? Results.Ok(result)
