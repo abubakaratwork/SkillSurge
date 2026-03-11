@@ -6,7 +6,7 @@ import { Product } from '../../core/models/interfaces/Product';
 import { UtilityService } from '../../core/services/utility.service';
 import { Category } from '../../core/models/interfaces/Category';
 import { Currency } from '../../core/models/interfaces/Currency';
-import { LocalCurrencyService } from '../../core/services/localcurrency.service';
+import { ApiCurrency, LocalCurrencyService } from '../../core/services/localcurrency.service';
 import { SubCategory } from '../../core/models/interfaces/SubCategory';
 import { UserService } from '../../core/services/user.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -50,6 +50,7 @@ export class ProductDialog {
   subCategoryRequired: boolean = false;
 
   currencies: Currency[] = [];
+  apiCurrencies: ApiCurrency[] = [];
 
   products: Product[] = [];
 
@@ -104,6 +105,10 @@ export class ProductDialog {
       this.dialogAction = this.dialogData?.action;
       this.currencies = this.currencyService.getAll();
     }
+
+    this.currencyService.getCurrenciesFromAPI().subscribe((data) => {
+      this.apiCurrencies = data;
+    })
   }
 
   submitForm(productForm: NgForm) {
